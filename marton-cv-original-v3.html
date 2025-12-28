@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marton Mocsonoky - Product Manager & AI Architect (A4)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist+Sans:wght@100;200;300;400;500;600;700;800;900&family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Brand Colors - Refined & Sharp */
+            --color-bg: #FFFFFF;
+            --color-text-main: #1A1A1A;
+            --color-text-secondary: #555555;
+            --color-text-muted: #888888;
+
+            /* Accents */
+            --color-accent: #D58F7C;
+            /* Coral */
+            --color-accent-dark: #B56F5C;
+            --color-sage: #61665C;
+            --color-border: #E0E0E0;
+            --color-bg-subtle: #F9F9F9;
+
+            /* Typography */
+            --font-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'Geist Mono', monospace;
+
+            /* Spacing - Optimized for A4 */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 0.85rem;
+            --space-lg: 1.25rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: #525659;
+            /* Dark grey background for document viewer feel */
+            color: var(--color-text-main);
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 10.5pt;
+            /* Print optimized font size */
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        /* A4 Page Container */
+        .page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 15mm;
+            /* Standard print margins */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* UTILITIES */
+        .mono {
+            font-family: var(--font-mono);
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bold {
+            font-weight: 600;
+        }
+
+        .sharp-border {
+            border: 1px solid var(--color-border);
+            border-radius: 0;
+        }
+
+        /* HEADER */
+        .header {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 2px solid var(--color-text-main);
+        }
+
+        .header-main {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .name {
+            font-size: 2.8rem;
+            /* Slightly smaller for A4 */
+            font-weight: 800;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--space-sm);
+            color: var(--color-text-main);
+        }
+
+        .title {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--color-sage);
+            margin-bottom: var(--space-md);
+            display: inline-block;
+            border-bottom: 1px solid var(--color-sage);
+            padding-bottom: 2px;
+        }
+
+        .tagline {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+            max-width: 480px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-xs);
+            align-content: start;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .contact-item:hover {
+            border-color: var(--color-sage);
+            color: var(--color-text-main);
+            background: #fff;
+        }
+
+        .contact-icon {
+            width: 16px;
+            height: 16px;
+            stroke: var(--color-sage);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        /* SECTIONS */
+        .section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--space-xs);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        /* EXPERIENCE */
+        .experience-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .job-item {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: var(--space-xl);
+            page-break-inside: avoid;
+            /* CRITICAL FOR PRINT */
+            break-inside: avoid;
+        }
+
+        .job-meta {
+            text-align: left;
+        }
+
+        .company {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .role {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--color-sage);
+            margin-bottom: var(--space-xs);
+        }
+
+        .date {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            font-weight: 500;
+        }
+
+        .job-content p {
+            margin-bottom: var(--space-sm);
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .job-highlights {
+            list-style: none;
+        }
+
+        .job-highlights li {
+            position: relative;
+            padding-left: var(--space-md);
+            margin-bottom: 3px;
+            /* Tighter bullets for print */
+            font-size: 0.9rem;
+            color: var(--color-text-main);
+        }
+
+        .job-highlights li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 7px;
+            width: 5px;
+            height: 5px;
+            background: var(--color-accent);
+        }
+
+        /* SKILLS GRID - "SPECS SHEET" */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1px;
+            background: var(--color-border);
+            border: 1px solid var(--color-border);
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .skill-cell {
+            background: var(--color-bg);
+            padding: var(--space-md);
+        }
+
+        .skill-category {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-xs);
+            display: block;
+        }
+
+        .skill-list {
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* PROJECTS */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .project-card {
+            border: 1px solid var(--color-border);
+            padding: var(--space-md);
+            transition: border-color 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .project-card:hover {
+            border-color: var(--color-sage);
+        }
+
+        .project-name {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .project-tech {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--color-sage);
+            margin-bottom: var(--space-sm);
+        }
+
+        .project-desc {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-sm);
+            flex-grow: 1;
+        }
+
+        .project-link {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        /* PRINT SPECIFIC */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+                display: block;
+                padding: 0;
+            }
+
+            .page {
+                width: 100%;
+                min-height: auto;
+                box-shadow: none;
+                margin: 0;
+                padding: 15mm;
+                /* Keep internal padding */
+            }
+
+            .container {
+                width: 100%;
+                max-width: none;
+                padding: 0;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-main">
+                <div>
+                    <h1 class="name">Marton Mocsonoky</h1>
+                    <div class="title">PRODUCT MANAGER & AI ARCHITECT</div>
+                </div>
+                <p class="tagline">
+                    Combining strategic product management with technical AI expertise to build scalable, human-centric
+                    systems.
+                    Expert in guiding products from discovery to deployment, bridging the gap between complex language
+                    models
+                    and intuitive user interfaces to solve real business problems.
+                </p>
+            </div>
+            <div class="contact-grid">
+                <a href="mailto:marci.mocsonoky@gmail.com" class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24">
+                        <rect x="2" y="4" width="20" height="16" rx="0" ry="0"></rect>
+                        <path d="M22,6 L12,13 L2,6"></path>
+                    </svg>
+                    marci.mocsonoky@gmail.com
+                </a>
+                <a href="tel:+36202312384" class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    +36 20 231 2384
+                </a>
+                <a href="https://www.linkedin.com/in/marton-mocsonoky/" class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <rect x="2" y="9" width="4" height="12"></rect>
+                        <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                    linkedin.com/in/marton-mocsonoky
+                </a>
+                <div class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Budapest, Hungary
+                </div>
+            </div>
+        </header>
+
+        <!-- TECHNICAL SKILLS -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Technical Arsenal</h2>
+                <span class="section-subtitle">CORE COMPETENCIES & STACK</span>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-cell">
+                    <span class="skill-category">Product Design</span>
+                    <div class="skill-list">
+                        Figma, Interactive Prototyping, User Research, Wireframing, UI/UX Strategy, Usability Testing
+                    </div>
+                </div>
+                <div class="skill-cell">
+                    <span class="skill-category">AI Strategy</span>
+                    <div class="skill-list">
+                        Prompt Engineering, AI Product Strategy, Workflow Automation, LLM Integration
+                    </div>
+                </div>
+                <div class="skill-cell">
+                    <span class="skill-category">Development & Ops</span>
+                    <div class="skill-list">
+                        Dev Handoff, Agile/Scrum, Stakeholder Management, Workshop Facilitation
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXPERIENCE -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Experience</h2>
+                <span class="section-subtitle">SELECTED TRACK RECORD</span>
+            </div>
+            <div class="experience-list">
+
+                <!-- AI Consulting -->
+                <article class="job-item">
+                    <div class="job-meta">
+                        <div class="company">AI Consulting</div>
+                        <div class="role">Strategic Consultant</div>
+                        <div class="date">Jan 2023 - Present</div>
+                    </div>
+                    <div class="job-content">
+                        <p>
+                            Driving digital transformation for SMEs through custom AI implementation.
+                            Focusing on high-impact automation and employee augmentation rather than replacement.
+                        </p>
+                        <ul class="job-highlights">
+                            <li><strong>Operational Efficiency:</strong> Architected automation workflows significantly
+                                reducing manual data entry bottlenecks for key clients.</li>
+                            <li><strong>Strategic Implementation:</strong> Designed and deployed AI-driven customer
+                                service strategies, drastically improving response times.</li>
+                            <li><strong>Corporate Training:</strong> Upskilled professionals in practical AI
+                                application and prompt engineering.</li>
+                            <li><strong>Strategic Roadmapping:</strong> Partnered with founders to define long-term AI
+                                adoption roadmaps aligned with business goals.</li>
+                            <li><strong>Solution Architecture:</strong> Designed scalable AI architectures integrating
+                                LLMs with existing business workflows to solve complex operational challenges.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- Paynance -->
+                <article class="job-item">
+                    <div class="job-meta">
+                        <div class="company">Paynance</div>
+                        <div class="role">Senior Product Manager</div>
+                        <div class="date">Aug 2023 - Aug 2025</div>
+                    </div>
+                    <div class="job-content">
+                        <p>
+                            Leading <strong>product strategy and design</strong> for a comprehensive fintech ecosystem
+                            spanning web, mobile, and POS terminals.
+                            Managing the full lifecycle from discovery to delivery while spearheading AI integration.
+                        </p>
+                        <ul class="job-highlights">
+                            <li><strong>Product Strategy:</strong> Developed and executed product roadmaps aligned
+                                with business objectives, prioritizing the backlog based on market research.</li>
+                            <li><strong>Stakeholder Alignment:</strong> Presented product strategies and design
+                                decisions to executive stakeholders, ensuring alignment on business goals.</li>
+                            <li><strong>Platform Redesign:</strong> Led the UX overhaul of the merchant platform,
+                                serving 1,000+ active merchants.</li>
+                            <li><strong>Design Systems:</strong> Built a custom interactive design system website to
+                                streamline developer handoff and reduce implementation errors.</li>
+                            <li><strong>Rapid Prototyping:</strong> Created advanced interactive prototypes,
+                                accelerating the iteration and validation cycle by 3x.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- Freelance -->
+                <article class="job-item">
+                    <div class="job-meta">
+                        <div class="company">Freelancer</div>
+                        <div class="role">Strategic Consultant</div>
+                        <div class="date">Jan 2022 - Jan 2025</div>
+                    </div>
+                    <div class="job-content">
+                        <p>
+                            Strategic product consulting for startups, focusing on MVP definition and market fit.
+                        </p>
+                        <ul class="job-highlights">
+                            <li><strong>Product Launch:</strong> Guided 3 products from concept to market launch.</li>
+                            <li><strong>UX Audits:</strong> Delivered actionable UX improvements for 15+ digital
+                                products.</li>
+                            <li><strong>Market Analysis:</strong> Conducted competitive research to inform product
+                                positioning strategies.</li>
+                            <li><strong>Client Workshops:</strong> Facilitated discovery workshops to align stakeholder
+                                vision with user needs.</li>
+                            <li><strong>Stakeholder Management:</strong> Aligned diverse stakeholder groups on product
+                                vision and strategic roadmap execution.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- Bosch -->
+                <article class="job-item">
+                    <div class="job-meta">
+                        <div class="company">Bosch - Global Services Team</div>
+                        <div class="role">UX Researcher</div>
+                        <div class="date">Jan 2022 - Jun 2022</div>
+                    </div>
+                    <div class="job-content">
+                        <p>
+                            Optimizing internal tools and workflows for global engineering teams.
+                        </p>
+                        <ul class="job-highlights">
+                            <li><strong>Design Thinking:</strong> Facilitated workshops to solve complex workflow
+                                bottlenecks.</li>
+                            <li><strong>Global Research:</strong> Conducted user studies across international business
+                                units.</li>
+                            <li><strong>Advocacy:</strong> Championed user-centered design principles in a traditional
+                                engineering culture.</li>
+                            <li><strong>Data Visualization:</strong> Translated complex engineering data into accessible
+                                dashboards for non-technical stakeholders.</li>
+                            <li><strong>Strategic Assessment:</strong> Assessed digital products across departments to
+                                identify UX opportunities and tracked progress against team OKRs.</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- Everprove -->
+                <article class="job-item">
+                    <div class="job-meta">
+                        <div class="company">Everprove</div>
+                        <div class="role">UX/UI Designer</div>
+                        <div class="date">Jan 2018 - Nov 2021</div>
+                    </div>
+                    <div class="job-content">
+                        <p>
+                            Designing trustless legal-tech solutions on blockchain infrastructure.
+                        </p>
+                        <ul class="job-highlights">
+                            <li><strong>Complex Flows:</strong> Simplified cryptographic processes into intuitive user
+                                journeys.</li>
+                            <li><strong>Onboarding:</strong> Redesigned onboarding flow resulting in a 40% increase in
+                                user activation.</li>
+                            <li><strong>Prototyping:</strong> Created high-fidelity prototypes for rapid stakeholder
+                                validation.</li>
+                            <li><strong>Smart Contract UI:</strong> Designed transparent interfaces for smart contract
+                                interactions to build user trust.</li>
+                            <li><strong>Data-Driven Optimization:</strong> Identified and resolved conversion
+                                bottlenecks by analyzing heatmaps and user recordings, optimizing the contract
+                                finalization flow.</li>
+                        </ul>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- SIDE PROJECTS -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Selected Projects</h2>
+                <span class="section-subtitle">INNOVATION & EXPERIMENTS</span>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-name">Következő Token</div>
+                    <div class="project-tech">AI Training • Education Service</div>
+                    <p class="project-desc">
+                        My professional training service offering practical AI and LLM workshops for businesses,
+                        focusing on strategic implementation and prompt engineering.
+                    </p>
+                    <a href="http://kovetkezotoken.hu/" class="project-link">
+                        kovetkezotoken.hu
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+                <div class="project-card">
+                    <div class="project-name">Eclipse</div>
+                    <div class="project-tech">Document Security • Automation</div>
+                    <p class="project-desc">
+                        An automated document redaction tool built to protect sensitive information in educational
+                        institutions.
+                        It significantly reduces manual processing time while ensuring compliance with data privacy
+                        regulations.
+                    </p>
+                    <a href="https://eclipse.education/" class="project-link">
+                        eclipse.education
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+                <div class="project-card">
+                    <div class="project-name">Aromate</div>
+                    <div class="project-tech">AI Recommendation • Consumer Tech</div>
+                    <p class="project-desc">
+                        Developed a custom algorithm that analyzes user responses from an interactive quiz to generate
+                        highly personalized perfume recommendations.
+                    </p>
+                    <a href="https://aromate.vercel.app/" class="project-link">
+                        aromate.vercel.app
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+                <div class="project-card">
+                    <div class="project-name">SmartDocs</div>
+                    <div class="project-tech">Legal Tech • Document Processing</div>
+                    <p class="project-desc">
+                        Intelligent document processing solution tailored for law firms to automate administrative
+                        tasks.
+                        Features include ID processing and automated contract generation, based on the firms' specific
+                        templates.
+                    </p>
+                    <a href="https://ai-document-processing-rho.vercel.app/" class="project-link">
+                        ai-document-processing...
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- WEBSITES BUILT -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Websites Built</h2>
+                <span class="section-subtitle">DESIGN & DEVELOPMENT</span>
+            </div>
+            <p
+                style="margin-bottom: var(--space-lg); color: var(--color-text-secondary); max-width: 700px; font-size: 0.9rem;">
+                Custom websites designed and developed from scratch to meet specific client requirements.
+            </p>
+            <div class="skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="skill-cell">
+                    <div class="project-name" style="margin-bottom: 4px;">Dr. Nagy Donát</div>
+                    <a href="http://drnd.hu/" class="project-link" style="margin-bottom: 8px;">
+                        drnd.hu
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                    <p style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4;">
+                        A professional legal practice website designed to establish trust and accessibility.
+                    </p>
+                </div>
+                <div class="skill-cell">
+                    <div class="project-name" style="margin-bottom: 4px;">BeautifulData</div>
+                    <a href="https://www.beautifuldata.co.uk/" class="project-link" style="margin-bottom: 8px;">
+                        beautifuldata.co.uk
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                    <p style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4;">
+                        A portfolio site for a data visualization agency showcasing complex data storytelling.
+                    </p>
+                </div>
+                <div class="skill-cell">
+                    <div class="project-name" style="margin-bottom: 4px;">Artimestudio</div>
+                    <a href="https://artimestudio.vercel.app/" class="project-link" style="margin-bottom: 8px;">
+                        artimestudio.vercel.app
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                    <p style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4;">
+                        A minimalist creative portfolio designed to highlight visual work.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+
+</html>
