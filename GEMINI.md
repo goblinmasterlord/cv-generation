@@ -13,7 +13,7 @@ npm run dev
 ## Tech Stack
 
 - **Frontend**: React 19 + Vite 6
-- **AI**: Google Gemini 2.0 Flash via direct API calls
+- **AI**: Google Gemini 3 Flash Preview (`gemini-3-flash-preview`)
 - **Styling**: Vanilla CSS (Sharp Editorial aesthetic from DESIGN.md)
 - **Fonts**: Geist Sans / Geist Mono
 
@@ -57,7 +57,7 @@ cv-generator/
 
 **API Call** (in `App.jsx`):
 ```javascript
-fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
