@@ -50,6 +50,25 @@ function App() {
         }, 3000)
     }, [])
 
+    const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
+    // Handle window resize for mobile detection
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 900)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
+    // Auto-open preview on mobile when done tailoring
+    useEffect(() => {
+        if (loadingStep === 3 && isMobile) { // Step 3 is formatting/done
+            setIsMobilePreviewOpen(true)
+        }
+    }, [loadingStep, isMobile])
+
+
     // --- Actions ---
 
     const handleTailor = useCallback(async () => {
@@ -170,7 +189,7 @@ function App() {
     // --- Render ---
 
     return (
-        <div className="app">
+        <div className={`app ${isMobile ? 'app--mobile' : ''} ${isMobilePreviewOpen ? 'app--preview-open' : ''}`}>
             <ToastContainer toasts={toasts} />
 
             {/* Header */}
@@ -254,36 +273,48 @@ function App() {
                         />
                     </section>
 
-                    {/* Actions */}
-                    <div className="action-bar animate-in animate-in--delay-3">
-                        <div className="action-bar__primary">
-                            <button
-                                className="btn btn--primary"
-                                onClick={handleTailor}
-                                disabled={isLoading || !jobDescription.trim()}
-                                style={{ width: '100%' }}
-                            >
-                                {isLoading ? 'Processing...' : 'Tailor CV for This Job'}
-                            </button>
-                        </div>
+                    {/* Desktop Actions */}
+                    {!isMobile && (
+                        <div className="action-bar animate-in animate-in--delay-3">
+                            <div className="action-bar__primary">
+                                <button
+                                    className="btn btn--primary"
+                                    onClick={handleTailor}
+                                    disabled={isLoading || !jobDescription.trim()}
+                                    style={{ width: '100%' }}
+                                >
+                                    {isLoading ? 'Processing...' : 'Tailor CV for This Job'}
+                                </button>
+                            </div>
 
-                        <div className="action-bar__secondary">
-                            <button className="btn btn--secondary" onClick={handleReset} title="Reset">
-                                <Icons.Refresh /> Reset
-                            </button>
-                            <button className="btn btn--secondary" onClick={handleDownload} title="Download HTML">
-                                <Icons.Download /> Download
-                            </button>
-                            <button className="btn btn--secondary" onClick={handlePrint} title="Print PDF">
-                                <Icons.Print /> Print
-                            </button>
+                            <div className="action-bar__secondary">
+                                <button className="btn btn--secondary" onClick={handleReset} title="Reset">
+                                    <Icons.Refresh /> Reset
+                                </button>
+                                <button className="btn btn--secondary" onClick={handleDownload} title="Download HTML">
+                                    <Icons.Download /> Download
+                                </button>
+                                <button className="btn btn--secondary" onClick={handlePrint} title="Print PDF">
+                                    <Icons.Print /> Print
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </aside>
 
             {/* Preview Panel */}
             <main className="panel-preview">
+                {/* Mobile Preview Header */}
+                {isMobile && (
+                    <div className="mobile-preview-header">
+                        <h2 className="mobile-preview-title">CV Preview</h2>
+                        <button className="btn-icon" onClick={() => setIsMobilePreviewOpen(false)}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                )}
+
                 <div
                     className="cv-preview"
                     style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }} // Handle zoom transform
@@ -329,6 +360,41 @@ function App() {
                     </button>
                 </div>
             </main>
+
+            {/* Mobile Bottom Dock */}
+            {isMobile && (
+                <div className="mobile-dock">
+                    <div className="mobile-dock__actions">
+                        {!isMobilePreviewOpen ? (
+                            <>
+                                <button
+                                    className="btn btn--primary mobile-dock__main-btn"
+                                    onClick={handleTailor}
+                                    disabled={isLoading || !jobDescription.trim()}
+                                >
+                                    {isLoading ? 'Tailoring...' : 'Tailor CV'}
+                                </button>
+                                <button
+                                    className="btn btn--secondary mobile-dock__icon-btn"
+                                    onClick={() => setIsMobilePreviewOpen(true)}
+                                    title="View Preview"
+                                >
+                                    <Icons.Maximize />
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button className="btn btn--secondary mobile-dock__main-btn" onClick={handleDownload}>
+                                    <Icons.Download /> Save
+                                </button>
+                                <button className="btn btn--primary mobile-dock__icon-btn" onClick={() => setIsMobilePreviewOpen(false)}>
+                                    OK
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

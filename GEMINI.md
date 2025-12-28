@@ -52,6 +52,7 @@ cv-generator/
 3. **AI Tailoring**: Gemini rewrites profile, reorders bullets, integrates keywords
 4. **Template Selection**: Use base template or upload custom HTML
 5. **Export**: Download as HTML or Print to PDF
+6. **Mobile Responsive**: Full mobile editing support with bottom-sheet preview
 
 ## AI Integration
 
@@ -85,6 +86,7 @@ CSS Variables (defined in `src/styles/index.css`):
 - Sage green: `#61665C`
 - Fonts: Geist Sans (body), Geist Mono (code/labels)
 - No border-radius anywhere (Sharp Editorial)
+- **Mobile First**: Bottom dock navigation, sheet-based preview modal
 
 ## Prompt Philosophy
 

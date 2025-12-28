@@ -822,3 +822,162 @@ body {
   height: 1px;
   background: var(--color-border);
 }
+
+/* =====================================================
+   MOBILE RESPONSIVE - Sharp & Editorial
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+  /* --- Layout Changes --- */
+
+  .app--mobile {
+    display: block;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app__header {
+    background: var(--color-bg-app);
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* --- Input Panel (Main View) --- */
+
+  .app--mobile .panel-input {
+    width: 100%;
+    height: 100%;
+    border-right: none;
+    overflow-y: auto;
+    padding-bottom: 100px;
+    /* Space for Mobile Dock */
+    background: var(--color-bg-app);
+  }
+
+  .app--mobile .panel-input__content {
+    padding: var(--space-lg);
+    padding-top: 80px;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* --- Preview Panel (Bottom Sheet / Overlay) --- */
+
+  .app--mobile .panel-preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150;
+    background: #1a1a1a;
+    /* Match app bg for seamless look */
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    /* Professional ease */
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .app--preview-open .panel-preview {
+    transform: translateY(0);
+  }
+
+  /* Adjust CV Preview container for mobile */
+  .app--mobile .cv-preview {
+    height: calc(100% - 60px);
+    /* Subtract header height */
+    max-width: 100%;
+    margin-top: 60px;
+    /* Space for preview header */
+    border-radius: 0;
+    box-shadow: none;
+    background: #fff;
+  }
+
+  /* --- Mobile Preview Header --- */
+
+  .mobile-preview-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--color-bg-app);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-lg);
+    z-index: 10;
+  }
+
+  .mobile-preview-title {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-light);
+  }
+
+  .btn-icon {
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    padding: var(--space-sm);
+  }
+
+  /* --- Mobile Bottom Dock --- */
+
+  .mobile-dock {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-panel);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-md) var(--space-lg);
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+    /* iOS safe area */
+    z-index: 200;
+  }
+
+  .mobile-dock__actions {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .mobile-dock__main-btn {
+    flex: 1;
+    height: 48px;
+    font-size: 1rem;
+  }
+
+  .mobile-dock__icon-btn {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide standard Toast container on mobile to avoid overlap */
+  .app--mobile .toast-container {
+    bottom: 100px;
+    /* Push above dock */
+    width: 90%;
+    left: 5%;
+    transform: none;
+  }
+
+  .app--mobile .toast {
+    min-width: auto;
+    width: 100%;
+    justify-content: center;
+  }
+
+}
