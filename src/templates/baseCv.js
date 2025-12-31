@@ -327,7 +327,16 @@ export const baseCvTemplate = `<!DOCTYPE html>
         @media print {
             body { background: white; padding: 0; }
             .page { width: 100%; min-height: auto; box-shadow: none; padding: 16mm 18mm; }
-            .header::before { left: -18mm; } /* Ensure accent bar aligns with print margin edge */
+            .header::before { left: -18mm; }
+            .cv-change-highlight { background: none !important; border-bottom: none !important; }
+        }
+
+        /* Change Highlighting - Applied by AI when changes are made */
+        .cv-change-highlight {
+            background: rgba(196, 120, 94, 0.25);
+            border-bottom: 2px solid var(--color-accent);
+            padding: 0 2px;
+            transition: background 0.3s ease;
         }
     </style>
 </head>
