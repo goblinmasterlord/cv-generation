@@ -1398,6 +1398,29 @@ body {
   /* Space for apply bar */
 }
 
+.feedback-section {
+  margin-bottom: var(--space-lg);
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.feedback-section__header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.feedback-section__header:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .feedback-section__title {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -1405,17 +1428,30 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--color-accent);
-  margin-bottom: var(--space-md);
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
 .feedback-section__title svg {
   width: 12px;
   height: 12px;
+}
+
+.feedback-section__chevron {
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.feedback-section__chevron--open {
+  transform: rotate(180deg);
+}
+
+.feedback-section__content {
+  padding: var(--space-md);
 }
 
 .feedback-section__hint {
@@ -1424,6 +1460,36 @@ body {
   margin-left: auto;
   text-transform: none;
   letter-spacing: 0;
+}
+
+.feedback-section__count {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-left: var(--space-xs);
+}
+
+/* Compact Strengths - Chip Style */
+.strengths-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.strength-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.strength-chip svg {
+  width: 10px;
+  height: 10px;
+  color: #fbbf24;
 }
 
 /* Feedback Items Container */

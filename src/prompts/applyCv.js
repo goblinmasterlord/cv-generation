@@ -1,71 +1,75 @@
 // CV Apply Changes Prompt - Applies approved items with change highlighting
-// Wraps modified content in highlight spans for visual review
+// More aggressive approach: explicitly list each change with before/after
 
 export const createApplyPrompt = (approvedItems, cvHtml, highlightChanges = true) => {
-    const changes = approvedItems
-        .filter(item => item.action)
-        .map((item, i) => `${i + 1}. [${item.section || 'General'}] ${item.action}`)
-        .join('\n');
+  const changes = approvedItems
+    .filter(item => item.action)
+    .map((item, i) => {
+      let change = `\n### CHANGE ${i + 1} of ${approvedItems.length}`
+      change += `\nSection: ${item.section || 'General'}`
+      change += `\nType: ${item.type || 'improvement'}`
+      change += `\nWhat to do: ${item.action}`
+      if (item.currentText) {
+        change += `\nFind text: "${item.currentText}"`
+      }
+      if (item.text) {
+        change += `\nContext: ${item.text}`
+      }
+      return change
+    })
+    .join('\n');
 
-    const highlightInstruction = highlightChanges
-        ? `
-## CRITICAL: Change Highlighting Requirement (MANDATORY)
-You MUST wrap ALL modified text in highlight spans. This is NON-NEGOTIABLE.
+  return `You are a CV editor. You MUST apply ALL ${approvedItems.length} changes listed below. Do not skip any.
 
-For EVERY piece of text you modify, wrap it exactly like this:
-<span class="cv-change-highlight">modified text here</span>
+## YOUR MISSION
+Apply EXACTLY ${approvedItems.length} changes to this CV. Each change MUST be made. Each modification MUST be wrapped in a highlight span.
 
-Examples:
-- If you change "Managed projects" to "Led cross-functional projects":
-  Result: <span class="cv-change-highlight">Led cross-functional projects</span>
+## THE ${approvedItems.length} CHANGES TO APPLY
+${changes}
 
-- If you add a keyword "sustainability" to a sentence:
-  Original: "Developed carbon profiling methods"
-  Result: "Developed <span class="cv-change-highlight">sustainable</span> carbon profiling methods"
+## THE CV TO MODIFY
 
-Rules:
-- Highlight ONLY the changed words/phrases, not entire paragraphs
-- If you rewrite a full sentence, wrap the entire new sentence
-- EVERY modification MUST have a highlight span
-- If you don't add highlights, your response is INVALID
-
-I will check for cv-change-highlight spans. If there are none, you have failed the task.`
-        : '';
-
-    return `You are a precise CV editor. Apply ONLY the specific, user-approved changes listed below. Do not add anything beyond what is explicitly requested.
-
-## Your Principles
-- Apply ONLY the changes listed — nothing more, nothing less
-- NEVER fabricate or add experience the person doesn't have
-- Maintain the person's authentic voice and writing style
-- Preserve all HTML structure, CSS, and formatting
-- Make surgical, minimal edits
-- If a change cannot be applied (referenced section doesn't exist), skip it
-${highlightInstruction}
-
-## Approved Changes to Apply
-${changes || 'No changes to apply'}
-
-## Current CV HTML
 ${cvHtml}
 
-## Your Task
-Apply each approved change precisely to the CV:
-1. Locate the specified section
-2. Make the requested modification
-3. ${highlightChanges ? 'IMMEDIATELY wrap the changed text in <span class="cv-change-highlight">...</span>' : 'Ensure the change sounds natural'}
+## HOW TO APPLY EACH CHANGE
 
-## Output Requirements
-- Return ONLY the complete, modified HTML document
-- Start with <!DOCTYPE html> and end with </html>
-- Do not include any explanation, markdown code blocks, or additional text
-- Preserve all existing CSS styling exactly
-- Only modify content specified in the approved changes
-${highlightChanges ? '- MANDATORY: Every single modification MUST be wrapped in <span class="cv-change-highlight">...</span>' : ''}
+1. READ the change instruction carefully
+2. SEARCH the CV HTML for relevant text (search for keywords, not exact section names)
+3. MAKE the modification
+4. WRAP the changed text: <span class="cv-change-highlight">changed text</span>
 
-If there are no changes to apply, return the original CV unchanged.
+## EXAMPLES
 
-${highlightChanges ? 'FINAL REMINDER: No highlights = Failed response. Wrap all changes!' : ''}`;
+Example 1 - Adding a word:
+- Instruction: "Add 'cross-functional' before 'team'"
+- Before: <li>Managed a team of 5</li>
+- After: <li>Managed a <span class="cv-change-highlight">cross-functional</span> team of 5</li>
+
+Example 2 - Rewriting text:
+- Instruction: "Start with 'Led' instead of 'Delivery of'"
+- Before: <li>Delivery of product carbon profiling activities</li>
+- After: <li><span class="cv-change-highlight">Led product carbon profiling activities</span></li>
+
+Example 3 - Adding keyword:
+- Instruction: "Add 'sustainability' to the profile"
+- Before: <p class="tagline">Experienced Energy Consultant...</p>
+- After: <p class="tagline">Experienced <span class="cv-change-highlight">Sustainability</span> and Energy Consultant...</p>
+
+## CRITICAL REQUIREMENTS
+
+1. Apply ALL ${approvedItems.length} changes - check each one off mentally
+2. Every modification gets a highlight span
+3. Search by CONTENT, not by class names (the CV may have different HTML structure)
+4. Return the COMPLETE HTML document
+5. NO markdown, NO explanations, just the HTML
+
+## VERIFICATION
+
+Before returning, count your highlight spans. You should have approximately ${approvedItems.length} spans (one per change, though some changes might need multiple spans).
+
+If you applied fewer than ${approvedItems.length} changes, GO BACK and apply the ones you missed.
+
+Return the complete modified HTML starting with <!DOCTYPE html>`;
 };
 
 export default createApplyPrompt;

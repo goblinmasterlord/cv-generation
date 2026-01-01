@@ -1,81 +1,89 @@
-// CV Tailoring Prompt - Honest, genuine, no BS
-// Designed to emphasize relevant experience without fabrication
-// Includes change highlighting for visual review
+// CV Tailoring Prompt - Returns structured changes instead of HTML
+// Uses text representation for faster, more accurate tailoring
 
-export const createTailoringPrompt = (jobDescription, currentCvHtml, userComments = '') => {
-   return `You are an expert CV consultant who helps professionals present their genuine experience in the best light for specific roles. Your approach is honest, strategic, and never exaggerates.
+export const createTailoringPrompt = (jobDescription, cvText, cvHtml, userComments = '') => {
+   // cvText is the text-only representation from cvParser
+   // cvHtml is only used if cvText is not provided (fallback)
+   const content = cvText || cvHtml;
+
+   return `You are an expert CV consultant. Tailor this CV to the job description by returning a list of specific text changes.
 
 ## Your Principles
 - NEVER fabricate or exaggerate experience
 - NEVER add skills or qualifications the person doesn't have
 - Reorder and emphasize existing accomplishments relevant to the target role
-- Rewrite the profile/summary to naturally address job requirements using ONLY existing experience
-- Integrate job keywords ONLY where genuinely applicable to existing experience
-- Maintain the person's authentic voice - don't make it sound robotic or template-like
-- Keep bullet points concise, specific, and impactful
-- Prioritize recent and directly relevant experience
-- If something isn't relevant, de-emphasize it rather than remove it (unless it takes up valuable space)
-- The tone should be confident but not cocky, professional but not stiff
-
-## CRITICAL: Change Highlighting Requirement
-You MUST wrap ALL modified text in highlight spans so the user can see exactly what changed.
-
-For EVERY word, phrase, or sentence you modify, wrap it like this:
-<span class="cv-change-highlight">your modified text</span>
-
-Examples:
-- Original: "Managed a team"
-- Modified: <span class="cv-change-highlight">Led and mentored a cross-functional team</span>
-
-- Original: "Worked on projects"
-- Modified: <span class="cv-change-highlight">Delivered high-impact sustainability projects</span>
-
-Be precise — highlight ONLY the actual changed text, not entire paragraphs. If you rewrite a bullet point, wrap the entire new bullet text. If you only change a few words, wrap just those words.
-
-THIS IS MANDATORY. Every single modification must be wrapped in cv-change-highlight spans.
-
-## What You Should Modify
-1. **Profile Statement** (data-tailorable="profile"): Rewrite to naturally highlight aspects of their background most relevant to this specific role. Keep it genuine - don't claim expertise they don't have. WRAP THE ENTIRE REWRITTEN PROFILE IN HIGHLIGHT SPAN.
-
-2. **Experience Bullets** (data-tailorable="experience"): 
-   - Reorder bullets within each job to put the most relevant first
-   - Slightly rephrase bullets to emphasize transferable aspects relevant to the job
-   - Add relevant keywords naturally where the experience genuinely supports them
-   - Keep the same overall structure and number of bullets
-   - WRAP ANY MODIFIED BULLET TEXT IN HIGHLIGHT SPANS
-
-3. **Skills** (data-tailorable="skills"):
-   - If there are skills in the job description that genuinely match the person's background, ensure they're prominently listed
-   - Don't add skills they don't have
-
-4. **Certifications** (data-tailorable="certifications"):
-   - Optionally reorder to put most relevant first
-   - Don't add certifications they don't have
-
-## What You Should NOT Modify
-- Contact information
-- Education details (university, degree, dates)
-- Company names, job titles, or dates
-- The overall HTML structure and CSS styling
-- Any factual information
+- Integrate job keywords ONLY where genuinely applicable
+- Maintain authentic voice - don't make it robotic
 
 ## Job Description
 ${jobDescription}
 
-## User's Additional Instructions
-${userComments || 'No additional instructions provided.'}
+## User Instructions
+${userComments || 'No additional instructions.'}
 
-## Current CV HTML
-${currentCvHtml}
+## CV Content
+${content}
 
 ## Your Task
-Return ONLY the modified HTML with your changes. Do not include any explanation, markdown code blocks, or additional text. Just the complete HTML document that can be directly rendered.
+Return a JSON object with a list of changes to make. Each change needs:
+- "find": The EXACT text currently in the CV (copy-paste from above)
+- "replace": The new tailored text
 
-REMEMBER: Wrap EVERY modification in <span class="cv-change-highlight">...</span>
+{
+  "summary": "<1-2 sentences explaining what you changed>",
+  "changes": [
+    {
+      "section": "Profile|Experience|Skills|Certifications",
+      "reason": "<why this change helps>",
+      "find": "<EXACT text from CV>",
+      "replace": "<new tailored text>"
+    }
+  ]
+}
 
-Make subtle but impactful changes that would make a hiring manager think "this person's background aligns well with what we need" - not "this person is trying too hard to fit a mold they don't match."
+## What to Change
 
-The output must be a complete, valid HTML document starting with <!DOCTYPE html> and ending with </html>.`;
+1. **Profile/Tagline**: Rewrite to highlight aspects most relevant to this role
+2. **Experience Bullets**: Rephrase to emphasize transferable skills and add relevant keywords
+3. **Skills**: Reorder to put most relevant first (if applicable)
+
+## Examples
+
+Profile change:
+{
+  "section": "Profile",
+  "reason": "Emphasize sustainability expertise for this green energy role",
+  "find": "Experienced Energy Consultant with a passion for driving meaningful climate action",
+  "replace": "Results-driven Sustainability & Energy Consultant specializing in carbon reduction strategies and climate action"
+}
+
+Experience bullet change:
+{
+  "section": "Experience",
+  "reason": "Add leadership emphasis for senior role",
+  "find": "Delivery of product carbon profiling activities",
+  "replace": "Led product carbon profiling initiatives across 15+ major projects"
+}
+
+Keyword integration:
+{
+  "section": "Experience", 
+  "reason": "Add 'stakeholder management' keyword from job description",
+  "find": "scoping, resource planning, scheduling",
+  "replace": "scoping, resource planning, scheduling, and stakeholder management"
+}
+
+## CRITICAL Requirements
+- "find" must be EXACT text from CV content above (copy-paste it)
+- Make 8-15 strategic changes
+- Focus on high-impact changes (profile and key experience bullets)
+- Return ONLY valid JSON, no markdown blocks
+
+## What NOT to Change
+- Company names, job titles, dates
+- Education details
+- Contact information
+- Factual achievements (e.g., percentages, metrics)`;
 };
 
 export default createTailoringPrompt;

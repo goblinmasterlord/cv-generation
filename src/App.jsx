@@ -2,7 +2,8 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import baseCvTemplate from './templates/baseCv'
 import { createTailoringPrompt } from './prompts/tailorCv'
 import { createFeedbackPrompt } from './prompts/feedbackCv'
-import { createApplyPrompt } from './prompts/applyCv'
+import { parseCvToText, generateTextRepresentation } from './utils/cvParser'
+import { applyChanges as applyChangesToHtml, stripHighlights, hasHighlights as checkHighlights } from './utils/changeApplier'
 
 // --- Utility Components ---
 
@@ -149,6 +150,49 @@ const SteppedLoadingOverlay = ({ steps, currentStep, title }) => (
     </div>
 )
 
+// Collapsible Section Component
+const CollapsibleSection = ({ title, icon, count, hint, children, defaultOpen = true }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen)
+
+    return (
+        <div className={`feedback-section ${isOpen ? 'feedback-section--open' : ''}`}>
+            <button
+                className="feedback-section__header"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <h3 className="feedback-section__title">
+                    {icon} {title}
+                    <span className="feedback-section__count">{count}</span>
+                    {hint && <span className="feedback-section__hint">{hint}</span>}
+                </h3>
+                <svg
+                    className={`feedback-section__chevron ${isOpen ? 'feedback-section__chevron--open' : ''}`}
+                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </button>
+            {isOpen && (
+                <div className="feedback-section__content">
+                    {children}
+                </div>
+            )}
+        </div>
+    )
+}
+
+// Compact Strengths Component
+const StrengthsList = ({ strengths }) => (
+    <div className="strengths-compact">
+        {strengths.map(item => (
+            <div key={item.id} className="strength-chip">
+                <Icons.Star />
+                <span>{item.text}</span>
+            </div>
+        ))}
+    </div>
+)
+
 // Feedback Results Component - Interactive
 const FeedbackResults = ({ feedback, onToggleItem }) => {
     if (!feedback) return null
@@ -176,51 +220,51 @@ const FeedbackResults = ({ feedback, onToggleItem }) => {
             {/* Perspective Scores */}
             <PerspectiveScores perspectives={feedback.perspectives} />
 
-            <div className="feedback-sections">
-                {strengths.length > 0 && (
-                    <div className="feedback-section">
-                        <h3 className="feedback-section__title">
-                            <Icons.Star /> Strengths
-                            <span className="feedback-section__count">{strengths.length}</span>
-                        </h3>
-                        <div className="feedback-items">
-                            {strengths.map(item => (
-                                <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
-                            ))}
-                        </div>
-                    </div>
-                )}
+            {/* Compact Strengths */}
+            {strengths.length > 0 && (
+                <CollapsibleSection
+                    title="Strengths"
+                    icon={<Icons.Star />}
+                    count={strengths.length}
+                    defaultOpen={false}
+                >
+                    <StrengthsList strengths={strengths} />
+                </CollapsibleSection>
+            )}
 
-                {improvements.length > 0 && (
-                    <div className="feedback-section">
-                        <h3 className="feedback-section__title">
-                            <Icons.Arrow /> Improvements
-                            <span className="feedback-section__count">{improvements.length}</span>
-                            <span className="feedback-section__hint">Click to approve</span>
-                        </h3>
-                        <div className="feedback-items">
-                            {improvements.map(item => (
-                                <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
-                            ))}
-                        </div>
+            {/* Improvements - Main Focus */}
+            {improvements.length > 0 && (
+                <CollapsibleSection
+                    title="Improvements"
+                    icon={<Icons.Arrow />}
+                    count={improvements.length}
+                    hint="Click to approve"
+                    defaultOpen={true}
+                >
+                    <div className="feedback-items">
+                        {improvements.map(item => (
+                            <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
+                        ))}
                     </div>
-                )}
+                </CollapsibleSection>
+            )}
 
-                {keywords.length > 0 && (
-                    <div className="feedback-section">
-                        <h3 className="feedback-section__title">
-                            <Icons.Tag /> Missing Keywords
-                            <span className="feedback-section__count">{keywords.length}</span>
-                            <span className="feedback-section__hint">Click to add</span>
-                        </h3>
-                        <div className="feedback-items">
-                            {keywords.map(item => (
-                                <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
-                            ))}
-                        </div>
+            {/* Keywords */}
+            {keywords.length > 0 && (
+                <CollapsibleSection
+                    title="Missing Keywords"
+                    icon={<Icons.Tag />}
+                    count={keywords.length}
+                    hint="Click to add"
+                    defaultOpen={true}
+                >
+                    <div className="feedback-items">
+                        {keywords.map(item => (
+                            <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
+                        ))}
                     </div>
-                )}
-            </div>
+                </CollapsibleSection>
+            )}
         </div>
     )
 }
@@ -343,7 +387,12 @@ function App() {
     }, [activeMode])
 
     // Count approved items
-    const approvedCount = feedback?.items?.filter(i => i.approved && i.action).length || 0
+    // Count approved items that have find/replace data (or legacy action field)
+    const approvedCount = feedback?.items?.filter(i => {
+        if (!i.approved) return false
+        // Check for new format (find/replace) or legacy format (action)
+        return (i.find && i.replace) || i.action
+    }).length || 0
 
     // Generate apply steps based on approved items
     const getApplySteps = useCallback(() => {
@@ -388,15 +437,18 @@ function App() {
             const apiKey = import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
             if (!apiKey) throw new Error('API key not configured')
 
+            // Step 1: Parse CV to text
             setLoadingStep(1)
-            await new Promise(r => setTimeout(r, 600))
+            const parsed = parseCvToText(currentCv)
+            const cvText = generateTextRepresentation(parsed)
+            console.log('Parsed CV text:', cvText.substring(0, 500))
 
-            const prompt = createTailoringPrompt(jobDescription, currentCv, userComments)
-
+            // Step 2: Get structured changes from AI
             setLoadingStep(2)
+            const prompt = createTailoringPrompt(jobDescription, cvText, currentCv, userComments)
 
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -410,21 +462,39 @@ function App() {
             if (!response.ok) throw new Error(`API request failed: ${response.status}`)
 
             const data = await response.json()
-            const tailoredHtml = data.candidates?.[0]?.content?.parts?.[0]?.text
+            const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
 
-            if (!tailoredHtml) throw new Error('No response from AI')
+            if (!responseText) throw new Error('No response from AI')
 
+            // Step 3: Parse JSON response and apply changes
             setLoadingStep(3)
-            await new Promise(r => setTimeout(r, 400))
-
-            const cleanHtml = tailoredHtml
-                .replace(/^```html\n?/i, '')
+            const cleanJson = responseText
+                .replace(/^```json\n?/i, '')
                 .replace(/\n?```$/i, '')
                 .trim()
 
-            setCurrentCv(cleanHtml)
+            console.log('AI response:', cleanJson.substring(0, 500))
+
+            const tailorData = JSON.parse(cleanJson)
+            const changes = tailorData.changes || []
+
+            console.log('Changes to apply:', changes.length)
+
+            // Apply changes programmatically
+            const result = applyChangesToHtml(currentCv, changes)
+            console.log('Apply result:', result.summary)
+
+            setCurrentCv(result.html)
+            setShowHighlights(true)
             setFlowStep(1) // Move to result step
-            addToast('CV tailored successfully!')
+
+            const { applied, failed } = result.summary
+            if (failed > 0) {
+                addToast(`Tailored CV with ${applied} changes (${failed} could not be applied)`, 'success')
+            } else {
+                addToast(`CV tailored with ${applied} changes!`, 'success')
+            }
+
 
         } catch (error) {
             console.error('Tailoring error:', error)
@@ -449,15 +519,17 @@ function App() {
             const apiKey = import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
             if (!apiKey) throw new Error('API key not configured')
 
+            // Step 1: Parse CV to text
             setLoadingStep(1)
-            await new Promise(r => setTimeout(r, 500))
+            const parsed = parseCvToText(currentCv)
+            const cvText = generateTextRepresentation(parsed)
 
-            const prompt = createFeedbackPrompt(jobDescription, currentCv)
-
+            // Step 2: Get feedback from AI
             setLoadingStep(2)
+            const prompt = createFeedbackPrompt(jobDescription, cvText, currentCv)
 
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -513,10 +585,25 @@ function App() {
     }, [])
 
     const handleApplyChanges = useCallback(async () => {
-        const approvedItems = feedback?.items?.filter(i => i.approved && i.action) || []
+        // Get approved items that have find/replace data
+        const approvedItems = feedback?.items?.filter(i => {
+            if (!i.approved) return false
+            return i.find && i.replace
+        }) || []
 
         if (approvedItems.length === 0) {
-            addToast('No changes selected', 'error')
+            // Check what approved items we DO have
+            const allApproved = feedback?.items?.filter(i => i.approved) || []
+
+            // Fallback: check if there are items with action but no find/replace
+            const legacyItems = feedback?.items?.filter(i => i.approved && i.action) || []
+            if (legacyItems.length > 0) {
+                addToast('Selected items don\'t have replacement data. Please re-analyze.', 'error')
+            } else if (allApproved.length > 0) {
+                addToast(`${allApproved.length} items selected but missing find/replace data`, 'error')
+            } else {
+                addToast('No changes selected', 'error')
+            }
             return
         }
 
@@ -525,47 +612,28 @@ function App() {
         setApplyStep(0)
 
         try {
-            const apiKey = import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
-            if (!apiKey) throw new Error('API key not configured')
-
+            // Simulate stepped progress
             for (let i = 0; i < steps.length - 1; i++) {
                 setApplyStep(i)
-                await new Promise(r => setTimeout(r, 400 + Math.random() * 300))
+                await new Promise(r => setTimeout(r, 300))
             }
 
-            const prompt = createApplyPrompt(approvedItems, currentCv, true)
-
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
-                    })
-                }
-            )
-
-            if (!response.ok) throw new Error(`API request failed: ${response.status}`)
-
-            const data = await response.json()
-            const updatedHtml = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-            if (!updatedHtml) throw new Error('No response from AI')
+            // Apply changes programmatically - NO AI CALL NEEDED!
+            const result = applyChangesToHtml(currentCv, approvedItems)
 
             setApplyStep(steps.length - 1)
-            await new Promise(r => setTimeout(r, 400))
+            await new Promise(r => setTimeout(r, 200))
 
-            const cleanHtml = updatedHtml
-                .replace(/^```html\n?/i, '')
-                .replace(/\n?```$/i, '')
-                .trim()
-
-            setCurrentCv(cleanHtml)
+            setCurrentCv(result.html)
             setShowHighlights(true)
             setFlowStep(2) // Move to result step in feedback flow
-            addToast(`Applied ${approvedItems.length} improvement${approvedItems.length !== 1 ? 's' : ''} to your CV!`)
+
+            const { applied, failed } = result.summary
+            if (failed > 0) {
+                addToast(`Applied ${applied} changes (${failed} could not be found)`, 'success')
+            } else {
+                addToast(`Applied ${applied} improvement${applied !== 1 ? 's' : ''} to your CV!`, 'success')
+            }
 
         } catch (error) {
             console.error('Apply error:', error)

@@ -1,119 +1,105 @@
-// CV Feedback Prompt - Deep Multi-Perspective Analysis
-// Returns comprehensive feedback from Content Expert, HR/ATS, and Hiring Manager perspectives
+// CV Feedback Prompt - Returns structured changes instead of HTML
+// Uses text representation for faster, more accurate analysis
 
-export const createFeedbackPrompt = (jobDescription, cvHtml) => {
-  return `You are a panel of three expert CV reviewers analyzing a CV against a specific job description. Provide deep, comprehensive, and actionable feedback.
+export const createFeedbackPrompt = (jobDescription, cvText, cvHtml) => {
+  // cvText is the text-only representation from cvParser
+  // cvHtml is only used if cvText is not provided (fallback)
+  const content = cvText || cvHtml;
+
+  return `You are a panel of three expert CV reviewers analyzing a CV against a job description.
 
 ## The Three Perspectives
 
 ### 1. CONTENT EXPERT (Technical Fit)
-Focus on: Technical skills match, experience relevance, industry knowledge, certifications, quantifiable achievements, depth of expertise
+Focus on: Technical skills match, experience relevance, quantifiable achievements
 Question: "Does this person have the skills and experience to do the job well?"
 
 ### 2. HR/ATS SPECIALIST (Screening & Compliance)
-Focus on: Keyword optimization, ATS parsability, formatting consistency, employment gaps, red flags, professional tone, length appropriateness
+Focus on: Keyword optimization, ATS parsability, formatting, professional tone
 Question: "Will this CV pass automated screening and initial HR review?"
 
 ### 3. HIRING MANAGER (Culture & Potential)
-Focus on: Leadership signals, growth trajectory, communication style, team fit indicators, initiative and impact, standout qualities
-Question: "Would I want to interview this person and have them on my team?"
+Focus on: Leadership signals, growth trajectory, standout qualities
+Question: "Would I want to interview this person?"
 
 ## Job Description
 ${jobDescription}
 
-## CV HTML
-${cvHtml}
+## CV Content
+${content}
 
 ## Your Task
-Provide comprehensive analysis from all three perspectives. Return a JSON object:
+Analyze the CV and return a JSON object with feedback AND specific changes.
+
+CRITICAL: Each change must include:
+- "find": The EXACT text currently in the CV (copy-paste from above)
+- "replace": The new text to use instead
 
 {
-  "overallScore": <weighted average 0-100>,
-  "summary": "<2-3 sentence executive summary>",
+  "overallScore": <0-100>,
+  "summary": "<2-3 sentence assessment>",
   "perspectives": {
-    "content": {
-      "score": <0-100>,
-      "summary": "<1-2 sentence assessment from Content Expert view>"
-    },
-    "hr": {
-      "score": <0-100>,
-      "summary": "<1-2 sentence assessment from HR/ATS view>"
-    },
-    "hiring": {
-      "score": <0-100>,
-      "summary": "<1-2 sentence assessment from Hiring Manager view>"
-    }
+    "content": { "score": <0-100>, "summary": "<1 sentence>" },
+    "hr": { "score": <0-100>, "summary": "<1 sentence>" },
+    "hiring": { "score": <0-100>, "summary": "<1 sentence>" }
   },
   "items": [
     {
       "id": "str-1",
       "type": "strength",
       "perspective": "content|hr|hiring",
-      "category": "experience|skills|profile|format|keyword|impact|growth",
-      "text": "<what makes this a strength>",
-      "section": "<CV section this relates to>"
+      "text": "<brief strength>"
     },
     {
       "id": "imp-1",
       "type": "improvement",
       "perspective": "content|hr|hiring",
-      "category": "experience|skills|profile|format|keyword|impact|growth",
-      "text": "<what could be improved>",
-      "action": "<SPECIFIC instruction: what to change, where, and how>",
-      "section": "<CV section to modify>",
-      "priority": "high|medium|low"
+      "priority": "high|medium|low",
+      "text": "<what to improve>",
+      "find": "<EXACT text from CV to change>",
+      "replace": "<new text>",
+      "section": "Profile|Experience|Skills"
     },
     {
       "id": "kw-1",
       "type": "keyword",
       "perspective": "hr",
-      "category": "keyword",
+      "priority": "high|medium|low",
       "text": "<missing keyword>",
-      "action": "<WHERE and HOW to integrate: be specific about placement>",
-      "section": "<suggested section>",
-      "priority": "high|medium|low"
+      "find": "<EXACT text to modify>",
+      "replace": "<text with keyword added>",
+      "section": "Profile|Experience|Skills"
     }
   ]
 }
 
-## Item Guidelines
+## CRITICAL: find/replace Requirements
 
-### Strengths (5-7 items)
-- Distribute across all three perspectives
-- Be specific about WHY it's strong for THIS role
-- Reference actual content from the CV
+The "find" field MUST be EXACT text from the CV content above. Copy-paste it exactly.
 
-### Improvements (8-12 items)
-- Prioritize by impact (high/medium/low)
-- Each must have a concrete, implementable action
-- Include perspective so user knows WHY it matters
-- Cover: profile rewording, bullet reordering, emphasis changes, quantification opportunities
-- Don't suggest adding fake experience
+Examples:
+- find: "Delivery of product carbon profiling activities"
+  replace: "Led end-to-end product carbon profiling initiatives"
 
-### Keywords (4-6 items)
-- Only keywords genuinely missing that match their background
-- Specific placement suggestions
-- Prioritize by ATS impact
+- find: "Managed a team of developers"
+  replace: "Led a cross-functional team of 8 developers"
 
-## Quality Checklist
-✓ Each action is specific enough to implement without further clarification
-✓ Improvements reference specific bullets, sections, or phrases
-✓ Perspectives are balanced (not all from one viewpoint)
-✓ High-priority items would make the biggest difference
-✓ No generic advice — everything is tailored to this CV + this job
+- find: "Experienced Energy Consultant"
+  replace: "Results-driven Sustainability and Energy Consultant"
 
-## Scoring Guidelines
-- 85-100: Exceptional match — CV strongly positions candidate
-- 70-84: Good match — Solid foundation, some optimization needed
-- 55-69: Moderate match — Relevant experience but gaps to address
-- 40-54: Weak match — Significant repositioning needed
-- Below 40: Poor match — Major gaps between CV and requirements
+If you want to ADD text (not replace), still use find/replace:
+- find: "carbon profiling"
+  replace: "carbon profiling and sustainability assessment"
+
+## Item Counts
+- Strengths: 3-4 items (brief, no find/replace needed)
+- Improvements: 5-8 items (MUST have find/replace)
+- Keywords: 2-4 items (MUST have find/replace)
 
 ## Important
 - Return ONLY valid JSON, no markdown code blocks
-- Be thorough — this is a deep analysis, not a quick scan
-- Total of 15-25 items provides comprehensive coverage
-- Actions should be precise enough that someone could implement them verbatim`;
+- Every improvement/keyword MUST have find and replace fields
+- The "find" text must exist EXACTLY in the CV content above`;
 };
 
 export default createFeedbackPrompt;
