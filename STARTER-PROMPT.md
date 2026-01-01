@@ -27,6 +27,28 @@ These files contain critical context. Do not skim—read completely.
 - **Custom CVs**: Always test with both `baseCv.js` AND uploaded HTML files (e.g., `marton-cv-original-v3.html`).
 - **Model name**: The API model is `gemini-3-pro-preview` (not `gemini-3-pro`).
 
+## Code Architecture (Maintain This Structure)
+
+> **CRITICAL**: Keep the modular architecture. Never let `App.jsx` grow beyond ~100 lines.
+
+### File Organization Rules
+
+| Type | Location | Guidelines |
+|------|----------|------------|
+| **Flow logic** | `features/<mode>/use<Mode>Flow.js` | All business logic + state for that mode |
+| **Flow UI** | `features/<mode>/<Mode>Flow.jsx` | Container that uses the hook, renders steps |
+| **Layout** | `components/layout/` | Header, BottomBar, StepIndicator — shared shells |
+| **Forms** | `components/forms/` | Reusable form components (TemplateSelector, FileUpload) |
+| **UI primitives** | `components/ui/` | Icons, Toast, LoadingOverlay, etc. |
+| **Shared hooks** | `hooks/` | Cross-flow state (useCvState, useGeminiApi) |
+
+### Anti-Patterns to Avoid
+
+- ❌ **God components**: No component should exceed ~300 lines
+- ❌ **Inline business logic**: Extract to hooks, not embedded in JSX
+- ❌ **Prop drilling 3+ levels**: Use shared hooks instead
+- ❌ **Duplicated patterns**: Extract to reusable components
+
 ## Documentation Maintenance
 
 > **IMPORTANT**: When making significant changes, update the relevant `.md` files:
