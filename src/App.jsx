@@ -31,6 +31,24 @@ function App() {
     const [createSourceImage, setCreateSourceImage] = useState(null) // { file, base64, preview }
     const [createSourceFileName, setCreateSourceFileName] = useState('')
 
+    // Create Mode - Contact Info (required)
+    const [createContactInfo, setCreateContactInfo] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        location: ''
+    })
+
+    // Create Mode - Optional Sections
+    const [includeEducation, setIncludeEducation] = useState(false)
+    const [includeCertifications, setIncludeCertifications] = useState(false)
+    const [createEducation, setCreateEducation] = useState('')
+    const [createCertifications, setCreateCertifications] = useState('')
+
+    // Create Mode - Section expansion (progressive disclosure)
+    const [experienceSectionOpen, setExperienceSectionOpen] = useState(false)
+    const [jobSectionOpen, setJobSectionOpen] = useState(false)
+
     // Loading State
     const [isLoading, setIsLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState(0)
@@ -89,6 +107,9 @@ function App() {
 
     // Check if CV has highlights
     const hasHighlights = currentCv.includes('cv-change-highlight')
+
+    // Progressive disclosure: check if required contact info is filled
+    const isContactFilled = createContactInfo.name.trim().length > 0
 
     // --- Actions ---
 
@@ -309,6 +330,10 @@ function App() {
     }, [addToast])
 
     const handleCreate = useCallback(async () => {
+        if (!createContactInfo.name.trim()) {
+            addToast('Please enter your name', 'error')
+            return
+        }
         if (!jobDescription.trim()) {
             addToast('Please enter a job description', 'error')
             return
@@ -326,12 +351,21 @@ function App() {
         setIsLoading(true)
         setLoadingStep(0)
 
+        // Build options object for prompts
+        const promptOptions = {
+            contactInfo: createContactInfo,
+            includeEducation,
+            includeCertifications,
+            educationText: createEducation,
+            certificationsText: createCertifications
+        }
+
         try {
             let responseText
 
             if (createSourceType === 'image' && createSourceImage) {
                 setLoadingStep(1)
-                const prompt = createCvMultimodalPrompt(jobDescription, userComments)
+                const prompt = createCvMultimodalPrompt(jobDescription, userComments, promptOptions)
 
                 setLoadingStep(2)
                 responseText = await callGeminiMultimodal(prompt, {
@@ -341,7 +375,7 @@ function App() {
             } else {
                 setLoadingStep(1)
                 const sourceText = createSourceType === 'text' ? createSourceText : createSourceText
-                const prompt = createCvPrompt(jobDescription, sourceText, userComments)
+                const prompt = createCvPrompt(jobDescription, sourceText, userComments, promptOptions)
 
                 setLoadingStep(2)
                 responseText = await callGemini(prompt, { temperature: 0.7 })
@@ -350,7 +384,7 @@ function App() {
             setLoadingStep(3)
             const cvData = parseJsonResponse(responseText)
 
-            const generatedHtml = generateCvHtml(cvData)
+            const generatedHtml = generateCvHtml(cvData, { includeEducation, includeCertifications })
             setCurrentCv(generatedHtml)
             setShowHighlights(true)
             setFlowStep(1)
@@ -364,7 +398,7 @@ function App() {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [jobDescription, createSourceType, createSourceText, createSourceImage, userComments, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
+    }, [jobDescription, createSourceType, createSourceText, createSourceImage, userComments, createContactInfo, includeEducation, includeCertifications, createEducation, createCertifications, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
 
     const handleDownload = useCallback(() => {
         const exportHtml = getExportCv()
@@ -567,146 +601,268 @@ function App() {
             return (
                 <div className="flow-step flow-step--input">
                     <div className="flow-step__content">
+                        {/* Contact Info Section - Always visible */}
                         <section className="input-section">
                             <div className="input-section__header">
-                                <h2 className="input-section__title">Your Experience</h2>
-                                <p className="input-section__subtitle">Provide your background in one of these formats</p>
+                                <h2 className="input-section__title">Contact Information</h2>
+                                <span className="input-section__optional">Required</span>
                             </div>
-                            <div className="source-type-selector">
-                                <button
-                                    className={`source-type-option ${createSourceType === 'text' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => setCreateSourceType('text')}
-                                >
-                                    <Icons.Text />
-                                    <span>Paste Text</span>
-                                </button>
-                                <button
-                                    className={`source-type-option ${createSourceType === 'image' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => setCreateSourceType('image')}
-                                >
-                                    <Icons.Image />
-                                    <span>Screenshot</span>
-                                </button>
-                                <button
-                                    className={`source-type-option ${createSourceType === 'html' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => setCreateSourceType('html')}
-                                >
-                                    <Icons.Upload />
-                                    <span>HTML File</span>
-                                </button>
+                            <div className="create-contact-grid">
+                                <div className="input-field input-field--full">
+                                    <label htmlFor="create-name">Full Name *</label>
+                                    <input
+                                        type="text"
+                                        id="create-name"
+                                        placeholder="e.g., John Smith"
+                                        value={createContactInfo.name}
+                                        onChange={(e) => setCreateContactInfo(prev => ({ ...prev, name: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="create-email">Email</label>
+                                    <input
+                                        type="email"
+                                        id="create-email"
+                                        placeholder="john@example.com"
+                                        value={createContactInfo.email}
+                                        onChange={(e) => setCreateContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="create-phone">Phone</label>
+                                    <input
+                                        type="tel"
+                                        id="create-phone"
+                                        placeholder="+44 7123 456789"
+                                        value={createContactInfo.phone}
+                                        onChange={(e) => setCreateContactInfo(prev => ({ ...prev, phone: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="input-field input-field--full">
+                                    <label htmlFor="create-location">Location</label>
+                                    <input
+                                        type="text"
+                                        id="create-location"
+                                        placeholder="e.g., London, UK"
+                                        value={createContactInfo.location}
+                                        onChange={(e) => setCreateContactInfo(prev => ({ ...prev, location: e.target.value }))}
+                                    />
+                                </div>
                             </div>
+                        </section>
 
-                            {createSourceType === 'text' && (
+                        {/* Experience Section - Collapsible, auto-expands when contact filled */}
+                        <div className={`create-section ${!isContactFilled ? 'create-section--disabled' : ''}`}>
+                            <button
+                                className="create-section__header"
+                                onClick={() => isContactFilled && setExperienceSectionOpen(!experienceSectionOpen)}
+                            >
+                                <h3 className="create-section__title">
+                                    <Icons.Briefcase /> Your Experience
+                                </h3>
+                                {!isContactFilled ? (
+                                    <span className="create-section__lock">Enter name to unlock</span>
+                                ) : (
+                                    <svg
+                                        className={`create-section__chevron ${experienceSectionOpen || isContactFilled ? 'create-section__chevron--open' : ''}`}
+                                        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                    >
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                )}
+                            </button>
+                            {(experienceSectionOpen || isContactFilled) && isContactFilled && (
+                                <div className="create-section__content">
+                                    <div className="source-type-selector">
+                                        <button
+                                            className={`source-type-option ${createSourceType === 'text' ? 'source-type-option--active' : ''}`}
+                                            onClick={() => setCreateSourceType('text')}
+                                        >
+                                            <Icons.Text />
+                                            <span>Paste Text</span>
+                                        </button>
+                                        <button
+                                            className={`source-type-option ${createSourceType === 'image' ? 'source-type-option--active' : ''}`}
+                                            onClick={() => setCreateSourceType('image')}
+                                        >
+                                            <Icons.Image />
+                                            <span>Screenshot</span>
+                                        </button>
+                                        <button
+                                            className={`source-type-option ${createSourceType === 'html' ? 'source-type-option--active' : ''}`}
+                                            onClick={() => setCreateSourceType('html')}
+                                        >
+                                            <Icons.Upload />
+                                            <span>HTML File</span>
+                                        </button>
+                                    </div>
+
+                                    {createSourceType === 'text' && (
+                                        <textarea
+                                            className="textarea textarea--large"
+                                            placeholder="Paste your experience, LinkedIn summary, resume bullets, or describe your background..."
+                                            value={createSourceText}
+                                            onChange={(e) => setCreateSourceText(e.target.value)}
+                                        />
+                                    )}
+
+                                    {createSourceType === 'image' && (
+                                        <div
+                                            className={`file-upload file-upload--large ${createSourceImage ? 'file-upload--active' : ''}`}
+                                            onClick={() => !createSourceImage && createFileInputRef.current?.click()}
+                                        >
+                                            {createSourceImage ? (
+                                                <div className="file-upload__image-preview">
+                                                    <img src={createSourceImage.preview} alt="CV Preview" />
+                                                    <div className="file-upload__image-overlay">
+                                                        <span className="file-upload__filename">{createSourceFileName}</span>
+                                                        <button
+                                                            className="file-upload__remove-btn"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setCreateSourceImage(null);
+                                                                setCreateSourceFileName('');
+                                                            }}
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <Icons.Image />
+                                                    <p className="file-upload__text">Upload CV Screenshot</p>
+                                                    <p className="file-upload__hint">PNG, JPG, or PDF screenshot</p>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {createSourceType === 'html' && (
+                                        <div
+                                            className={`file-upload ${createSourceFileName && createSourceType === 'html' ? 'file-upload--active' : ''}`}
+                                            onClick={() => !(createSourceFileName && createSourceType === 'html') && createFileInputRef.current?.click()}
+                                        >
+                                            {createSourceFileName && createSourceType === 'html' ? (
+                                                <div className="file-upload__preview">
+                                                    <span className="file-upload__filename">{createSourceFileName}</span>
+                                                    <span
+                                                        className="file-upload__remove"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setCreateSourceText('');
+                                                            setCreateSourceFileName('');
+                                                        }}
+                                                    >
+                                                        Remove
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <Icons.Upload />
+                                                    <p className="file-upload__text">Upload HTML CV</p>
+                                                    <p className="file-upload__hint">We'll extract the content</p>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <input
+                                        ref={createFileInputRef}
+                                        type="file"
+                                        accept={createSourceType === 'image' ? 'image/*' : '.html'}
+                                        onChange={handleCreateFileUpload}
+                                        style={{ display: 'none' }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Job Description Section - Collapsible */}
+                        <div className={`create-section ${!isContactFilled ? 'create-section--disabled' : ''}`}>
+                            <button
+                                className="create-section__header"
+                                onClick={() => isContactFilled && setJobSectionOpen(!jobSectionOpen)}
+                            >
+                                <h3 className="create-section__title">
+                                    <Icons.FileText /> Target Job
+                                </h3>
+                                {!isContactFilled ? (
+                                    <span className="create-section__lock">Enter name to unlock</span>
+                                ) : (
+                                    <svg
+                                        className={`create-section__chevron ${jobSectionOpen || isContactFilled ? 'create-section__chevron--open' : ''}`}
+                                        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                    >
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                )}
+                            </button>
+                            {(jobSectionOpen || isContactFilled) && isContactFilled && (
+                                <div className="create-section__content">
+                                    <textarea
+                                        className="textarea"
+                                        placeholder="Paste the job posting you're applying for..."
+                                        value={jobDescription}
+                                        onChange={(e) => setJobDescription(e.target.value)}
+                                    />
+                                    <div className="char-count">{jobDescription.length} chars</div>
+
+                                    <div style={{ marginTop: 'var(--space-md)' }}>
+                                        <textarea
+                                            className="textarea textarea--small"
+                                            placeholder="Additional notes (optional): specific focus or preferences..."
+                                            value={userComments}
+                                            onChange={(e) => setUserComments(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="divider">Optional Sections</div>
+
+                        {/* Education - Optional */}
+                        <div className={`create-optional-section ${includeEducation ? 'create-optional-section--active' : ''}`}>
+                            <label className="create-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={includeEducation}
+                                    onChange={(e) => setIncludeEducation(e.target.checked)}
+                                />
+                                <span className="create-checkbox__label">Include Education</span>
+                                <span className="create-checkbox__hint">Degrees, schools, years</span>
+                            </label>
+                            {includeEducation && (
                                 <textarea
-                                    className="textarea textarea--large"
-                                    placeholder="Paste your experience, LinkedIn summary, resume bullets, or describe your background...
-
-Example:
-- Software Engineer at Google (2020-2023)
-- Led team of 5 on search infrastructure
-- MSc Computer Science, Stanford 2020"
-                                    value={createSourceText}
-                                    onChange={(e) => setCreateSourceText(e.target.value)}
+                                    className="textarea textarea--small"
+                                    placeholder="e.g., BSc Computer Science, University of London, 2020"
+                                    value={createEducation}
+                                    onChange={(e) => setCreateEducation(e.target.value)}
                                 />
                             )}
+                        </div>
 
-                            {createSourceType === 'image' && (
-                                <div
-                                    className={`file-upload file-upload--large ${createSourceImage ? 'file-upload--active' : ''}`}
-                                    onClick={() => !createSourceImage && createFileInputRef.current?.click()}
-                                >
-                                    {createSourceImage ? (
-                                        <div className="file-upload__image-preview">
-                                            <img src={createSourceImage.preview} alt="CV Preview" />
-                                            <div className="file-upload__image-overlay">
-                                                <span className="file-upload__filename">{createSourceFileName}</span>
-                                                <button
-                                                    className="file-upload__remove-btn"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCreateSourceImage(null);
-                                                        setCreateSourceFileName('');
-                                                    }}
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Icons.Image />
-                                            <p className="file-upload__text">Upload CV Screenshot</p>
-                                            <p className="file-upload__hint">PNG, JPG, or PDF screenshot</p>
-                                        </>
-                                    )}
-                                </div>
+                        {/* Certifications - Optional */}
+                        <div className={`create-optional-section ${includeCertifications ? 'create-optional-section--active' : ''}`}>
+                            <label className="create-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={includeCertifications}
+                                    onChange={(e) => setIncludeCertifications(e.target.checked)}
+                                />
+                                <span className="create-checkbox__label">Include Certifications</span>
+                                <span className="create-checkbox__hint">Professional certs, licenses</span>
+                            </label>
+                            {includeCertifications && (
+                                <textarea
+                                    className="textarea textarea--small"
+                                    placeholder="e.g., AWS Solutions Architect, 2023"
+                                    value={createCertifications}
+                                    onChange={(e) => setCreateCertifications(e.target.value)}
+                                />
                             )}
-
-                            {createSourceType === 'html' && (
-                                <div
-                                    className={`file-upload ${createSourceFileName && createSourceType === 'html' ? 'file-upload--active' : ''}`}
-                                    onClick={() => !(createSourceFileName && createSourceType === 'html') && createFileInputRef.current?.click()}
-                                >
-                                    {createSourceFileName && createSourceType === 'html' ? (
-                                        <div className="file-upload__preview">
-                                            <span className="file-upload__filename">{createSourceFileName}</span>
-                                            <span
-                                                className="file-upload__remove"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setCreateSourceText('');
-                                                    setCreateSourceFileName('');
-                                                }}
-                                            >
-                                                Remove
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Icons.Upload />
-                                            <p className="file-upload__text">Upload HTML CV</p>
-                                            <p className="file-upload__hint">We'll extract the content</p>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-
-                            <input
-                                ref={createFileInputRef}
-                                type="file"
-                                accept={createSourceType === 'image' ? 'image/*' : '.html'}
-                                onChange={handleCreateFileUpload}
-                                style={{ display: 'none' }}
-                            />
-                        </section>
-
-                        <div className="divider">Target Job</div>
-
-                        <section className="input-section">
-                            <div className="input-section__header">
-                                <h2 className="input-section__title">Job Description</h2>
-                            </div>
-                            <textarea
-                                className="textarea"
-                                placeholder="Paste the job posting you're applying for..."
-                                value={jobDescription}
-                                onChange={(e) => setJobDescription(e.target.value)}
-                            />
-                            <div className="char-count">{jobDescription.length} chars</div>
-                        </section>
-
-                        <section className="input-section">
-                            <div className="input-section__header">
-                                <h2 className="input-section__title">Additional Notes</h2>
-                                <span className="input-section__optional">Optional</span>
-                            </div>
-                            <textarea
-                                className="textarea textarea--small"
-                                placeholder="Any specific focus or preferences..."
-                                value={userComments}
-                                onChange={(e) => setUserComments(e.target.value)}
-                            />
-                        </section>
+                        </div>
                     </div>
                 </div>
             )

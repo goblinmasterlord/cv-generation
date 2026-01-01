@@ -6,8 +6,14 @@ import baseCvTemplate from '../templates/baseCv';
 /**
  * Generate a CV HTML document from structured data
  * Uses the base template styling with injected content
+ * @param {Object} cvData - Structured CV data from AI
+ * @param {Object} options - Optional rendering flags
+ * @param {boolean} options.includeEducation - Whether to show education section
+ * @param {boolean} options.includeCertifications - Whether to show certifications section
  */
-export const generateCvHtml = (cvData) => {
+export const generateCvHtml = (cvData, options = {}) => {
+    const { includeEducation = true, includeCertifications = true } = options;
+
     const {
         name = 'Your Name',
         title = 'Professional Title',
@@ -413,15 +419,19 @@ export const generateCvHtml = (cvData) => {
 
         <div class="content">
             <aside class="sidebar">
+                ${includeEducation && education.length > 0 ? `
                 <section class="section">
                     <h2 class="section-title">Education</h2>
-                    ${educationHtml || '<p style="color: var(--color-text-muted); font-size: 8.5pt;">No education listed</p>'}
+                    ${educationHtml}
                 </section>
+                ` : ''}
 
+                ${includeCertifications && certifications.length > 0 ? `
                 <section class="section">
                     <h2 class="section-title">Certifications</h2>
                     ${certificationsHtml}
                 </section>
+                ` : ''}
 
                 <section class="section">
                     <h2 class="section-title">Skills</h2>

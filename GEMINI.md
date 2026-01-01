@@ -76,7 +76,7 @@ cv-generator/
 ## UI Flow (Step-Based)
 
 ### Create Mode (2 steps)
-1. **Input** → Provide experience (text/screenshot/HTML) + job description
+1. **Input** → Enter contact info (locked gates) → Unlock & provide experience (text/screenshot/HTML) + job description + optional sections
 2. **Result** → View generated CV with highlights
 
 ### Tailor CV Mode (2 steps)
@@ -110,38 +110,18 @@ See `CV-CHANGE-SYSTEM.md` for full details.
 
 **Environment Variable**: `VITE_GOOGLE_GENERATIVE_AI_API_KEY`
 
-## Prompts Architecture
-
-### `tailorCv.js`
-Returns structured changes (not HTML):
+### `createCv.js`
+Creates CV from scratch. Accepts `jobDescription`, `sourceText`, `userComments`, and an `options` object:
 ```json
 {
-  "summary": "Added leadership language...",
-  "changes": [
-    { "section": "Profile", "find": "...", "replace": "..." }
-  ]
+  "contactInfo": { "name": "...", "email": "...", "phone": "...", "location": "..." },
+  "includeEducation": true,
+  "includeCertifications": false,
+  "educationText": "...",
+  "certificationsText": "..."
 }
 ```
-
-### `feedbackCv.js`
-Multi-perspective analysis with find/replace:
-```json
-{
-  "overallScore": 75,
-  "perspectives": { "content": {...}, "hr": {...}, "hiring": {...} },
-  "items": [
-    {
-      "id": "imp-1",
-      "type": "improvement",
-      "priority": "high",
-      "text": "What to improve",
-      "find": "exact text from CV",
-      "replace": "new improved text",
-      "section": "Experience"
-    }
-  ]
-}
-```
+Returns full structured CV data (not changes). Conditional sections are omitted if flags are false.
 
 ## Change Highlighting System
 
@@ -183,6 +163,11 @@ Key states in `App.jsx`:
 - `createSourceType`: 'text' | 'image' | 'html' (for create mode)
 - `createSourceText`: Pasted experience text
 - `createSourceImage`: Uploaded screenshot { file, base64, preview }
+- `createContactInfo`: Object { name, email, phone, location }
+- `includeEducation` / `includeCertifications`: Booleans for optional sections
+- `createEducation` / `createCertifications`: Raw text for optional sections
+- `experienceSectionOpen` / `jobSectionOpen`: UI expansion states
+- `isContactFilled`: Progressive disclosure gate (name length > 0)
 
 ## Key Files to Edit
 

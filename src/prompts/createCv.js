@@ -1,8 +1,34 @@
 // CV Creation Prompt - Generates structured CV data from user input
 // Supports: screenshot (multimodal), HTML text, or raw experience text
 
-export const createCvPrompt = (jobDescription, sourceText, userComments = '') => {
-    return `You are an expert CV writer creating a professional CV from provided information.
+export const createCvPrompt = (jobDescription, sourceText, userComments = '', options = {}) => {
+  const {
+    contactInfo = {},
+    includeEducation = false,
+    includeCertifications = false,
+    educationText = '',
+    certificationsText = ''
+  } = options;
+
+  const educationSection = includeEducation ? `
+## Education Information
+${educationText || 'Extract from source if available'}
+` : '';
+
+  const certificationsSection = includeCertifications ? `
+## Certifications Information
+${certificationsText || 'Extract from source if available'}
+` : '';
+
+  const educationOutputNote = includeEducation
+    ? `- Include education section with details from the provided information`
+    : `- OMIT the education section entirely from output (set to empty array)`;
+
+  const certificationsOutputNote = includeCertifications
+    ? `- Include certifications section with details from the provided information`
+    : `- OMIT the certifications section entirely from output (set to empty array)`;
+
+  return `You are an expert CV writer creating a professional CV from provided information.
 
 ## Your Mission
 Transform the provided experience information into a polished, professional CV tailored for the target role.
@@ -27,6 +53,12 @@ Transform the provided experience information into a polished, professional CV t
    - Reorder sections to highlight most relevant experience first
    - Rephrase existing achievements to align with job requirements
 
+## Contact Information (USE EXACTLY AS PROVIDED)
+- Name: ${contactInfo.name || 'Extract from source'}
+- Email: ${contactInfo.email || null}
+- Phone: ${contactInfo.phone || null}
+- Location: ${contactInfo.location || null}
+
 ## Target Job Description
 ${jobDescription}
 
@@ -35,33 +67,33 @@ ${userComments || 'None provided.'}
 
 ## Source Information (Extract CV data from this)
 ${sourceText}
-
+${educationSection}${certificationsSection}
 ## Your Task
 Extract and structure the CV information as JSON. Return ONLY valid JSON, no markdown.
 
 {
-  "name": "<full name>",
+  "name": "${contactInfo.name || '<from source>'}",
   "title": "<professional title - tailored to job>",
   "profile": "<2-3 sentence professional summary tailored to the job>",
   "contact": {
-    "phone": "<phone if provided, otherwise null>",
-    "email": "<email if provided, otherwise null>",
-    "location": "<city/location if provided, otherwise null>"
+    "phone": "${contactInfo.phone || 'null'}",
+    "email": "${contactInfo.email || 'null'}",
+    "location": "${contactInfo.location || 'null'}"
   },
-  "education": [
+  "education": [${includeEducation ? `
     {
       "school": "<institution name>",
       "degree": "<degree and field>",
       "year": "<graduation year>",
       "details": ["<relevant coursework or achievements>"]
     }
-  ],
-  "certifications": [
+  ` : ''}],
+  "certifications": [${includeCertifications ? `
     {
       "name": "<certification name>",
       "year": "<year obtained or 'ongoing'>"
     }
-  ],
+  ` : ''}],
   "skills": [
     "<skill 1 - most relevant to job first>",
     "<skill 2>",
@@ -89,10 +121,12 @@ Extract and structure the CV information as JSON. Return ONLY valid JSON, no mar
 - **Experience bullets**: Start with action verbs (Led, Managed, Developed, Delivered)
 - **Skills**: Include only skills evidenced in the source material
 - **Order experience**: Most recent first, most relevant emphasized
+${educationOutputNote}
+${certificationsOutputNote}
 
 ## What to Do If Information Is Missing
 
-- If no phone/email/location → set to null
+- Use the contact info provided above EXACTLY (don't guess or change it)
 - If no education details → provide empty details array
 - If unclear dates → use approximate ("2020 – 2022")
 - If job title unclear → infer from context, keep professional
@@ -102,8 +136,22 @@ Return ONLY the JSON object, no explanation or markdown formatting.`;
 };
 
 // Multimodal prompt for image input (screenshot of CV)
-export const createCvMultimodalPrompt = (jobDescription, userComments = '') => {
-    return `You are an expert CV writer. Analyze the CV image provided and create a professional CV tailored for the target role.
+export const createCvMultimodalPrompt = (jobDescription, userComments = '', options = {}) => {
+  const {
+    contactInfo = {},
+    includeEducation = false,
+    includeCertifications = false
+  } = options;
+
+  const educationOutputNote = includeEducation
+    ? `- Include education section if visible in the image`
+    : `- OMIT the education section entirely from output (set to empty array)`;
+
+  const certificationsOutputNote = includeCertifications
+    ? `- Include certifications section if visible in the image`
+    : `- OMIT the certifications section entirely from output (set to empty array)`;
+
+  return `You are an expert CV writer. Analyze the CV image provided and create a professional CV tailored for the target role.
 
 ## Your Mission
 Extract all information from the CV image and restructure it for the target job.
@@ -125,6 +173,12 @@ Extract all information from the CV image and restructure it for the target job.
    - Use job keywords where naturally applicable
    - Adjust professional title/summary for role fit
 
+## Contact Information (USE EXACTLY AS PROVIDED)
+- Name: ${contactInfo.name || 'Extract from image'}
+- Email: ${contactInfo.email || 'Extract from image if visible'}
+- Phone: ${contactInfo.phone || 'Extract from image if visible'}
+- Location: ${contactInfo.location || 'Extract from image if visible'}
+
 ## Target Job Description
 ${jobDescription}
 
@@ -135,25 +189,23 @@ ${userComments || 'None provided.'}
 Return ONLY valid JSON (no markdown code blocks):
 
 {
-  "name": "<full name from CV>",
+  "name": "${contactInfo.name || '<from image>'}",
   "title": "<professional title - tailored to job>",
   "profile": "<2-3 sentence summary tailored to job>",
   "contact": {
-    "phone": "<phone if visible>",
-    "email": "<email if visible>",
-    "location": "<location if visible>"
+    "phone": "${contactInfo.phone || '<from image or null>'}",
+    "email": "${contactInfo.email || '<from image or null>'}",
+    "location": "${contactInfo.location || '<from image or null>'}"
   },
-  "education": [
+  "education": [${includeEducation ? `
     {
       "school": "<institution>",
       "degree": "<degree>",
       "year": "<year>",
       "details": ["<relevant details>"]
     }
-  ],
-  "certifications": [
-    { "name": "<cert name>", "year": "<year>" }
-  ],
+  ` : ''}],
+  "certifications": [${includeCertifications ? `{ "name": "<cert name>", "year": "<year>" }` : ''}],
   "skills": ["<skill 1>", "<skill 2>"],
   "experience": [
     {
@@ -167,7 +219,12 @@ Return ONLY valid JSON (no markdown code blocks):
   ]
 }
 
+## Section Notes
+${educationOutputNote}
+${certificationsOutputNote}
+
 Extract everything you can see, structure it professionally, and tailor the emphasis for the target role.`;
 };
 
 export default createCvPrompt;
+

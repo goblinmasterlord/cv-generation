@@ -115,6 +115,10 @@ function applyReplaceChange(html, change) {
         return { html, success: false, reason: `Text not found: "${find.substring(0, 50)}..."` };
     }
 
+    // CRITICAL FIX: Expand selection to include balanced tags matched text spans across closing tags
+    // This prevents issues where we replace "Text</b>" but leave "<b>" behind
+    position = expandSelectionToBalancedTags(html, position);
+
     console.log('[ChangeApplier] SUCCESS (' + matchType + '):', {
         index: position.index,
         length: position.length,
@@ -348,6 +352,80 @@ export function stripHighlights(html) {
  */
 export function hasHighlights(html) {
     return html.includes('cv-change-highlight');
+}
+
+/**
+ * Expand the selection range to ensure we don't leave unbalanced tags
+ * e.g. if we match "Title:</b> Description", we should expand start to include "<b>"
+ * so we replace "<b>Title:</b> Description" fully.
+ */
+function expandSelectionToBalancedTags(html, position) {
+    let { index, length } = position;
+
+    // Safety check
+    if (index < 0 || length <= 0 || index + length > html.length) {
+        return position;
+    }
+
+    // Get the actual HTML string we are planning to replace
+    const selection = html.substring(index, index + length);
+
+    // Check for unbalanced closing tags in the selection
+    const stack = [];
+    const unbalancedClosing = [];
+
+    // Regex to find tags
+    const tagRegex = /<\/?\w+[^>]*>/g;
+    let tagMatch;
+
+    while ((tagMatch = tagRegex.exec(selection)) !== null) {
+        const tag = tagMatch[0];
+        if (tag.startsWith('</')) {
+            const tagNameMatch = tag.match(/<\/(\w+)/);
+            if (tagNameMatch) {
+                const tagName = tagNameMatch[1];
+                if (stack.length > 0 && stack[stack.length - 1] === tagName) {
+                    stack.pop();
+                } else {
+                    unbalancedClosing.push(tagName);
+                }
+            }
+        } else if (!tag.endsWith('/>')) {
+            // Opening tag
+            const tagNameMatch = tag.match(/<(\w+)/);
+            if (tagNameMatch) {
+                const tagName = tagNameMatch[1];
+                const voidTags = ['br', 'hr', 'img', 'input', 'meta', 'link'];
+                if (!voidTags.includes(tagName.toLowerCase())) {
+                    stack.push(tagName);
+                }
+            }
+        }
+    }
+
+    // If we found unbalanced closing tags, find their opener BEFORE the selection
+    if (unbalancedClosing.length > 0) {
+        const firstUnbalanced = unbalancedClosing[0];
+
+        // Search backwards for the opening tag
+        const beforeHtml = html.substring(0, index);
+        const openTagRegex = new RegExp(`<${firstUnbalanced}(\\s[^>]*)?>`, 'gi');
+
+        let lastOpenIndex = -1;
+        let match;
+        while ((match = openTagRegex.exec(beforeHtml)) !== null) {
+            lastOpenIndex = match.index;
+        }
+
+        if (lastOpenIndex !== -1) {
+            const extraLength = index - lastOpenIndex;
+            index = lastOpenIndex;
+            length = length + extraLength;
+            console.log(`[ChangeApplier] Expanded selection left to include <${firstUnbalanced}> at ${index}`);
+        }
+    }
+
+    return { index, length };
 }
 
 export default { applyChanges, stripHighlights, hasHighlights };
