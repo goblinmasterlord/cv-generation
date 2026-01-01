@@ -28,7 +28,22 @@ cv-generator/
 │
 ├── src/
 │   ├── main.jsx            # React entry
-│   ├── App.jsx             # Main app - step-based flow UI (~750 lines)
+│   ├── App.jsx             # Thin shell (~45 lines) - mode switching only
+│   │
+│   ├── features/           # Feature-based architecture
+│   │   ├── tailor/
+│   │   │   ├── TailorFlow.jsx    # Tailor mode container
+│   │   │   ├── useTailorFlow.js  # Tailor logic + state
+│   │   │   └── index.js
+│   │   ├── feedback/
+│   │   │   ├── FeedbackFlow.jsx  # Feedback mode container (3 steps)
+│   │   │   ├── useFeedbackFlow.js
+│   │   │   └── index.js
+│   │   ├── create/
+│   │   │   ├── CreateFlow.jsx    # Create mode container
+│   │   │   ├── useCreateFlow.js
+│   │   │   └── index.js
+│   │   └── index.js              # Barrel exports
 │   │
 │   ├── components/
 │   │   ├── ui/             # Reusable UI components
@@ -36,22 +51,31 @@ cv-generator/
 │   │   │   ├── Toast.jsx           # Toast notifications + useToast hook
 │   │   │   ├── LoadingOverlay.jsx  # Stepped progress overlay
 │   │   │   ├── CollapsibleSection.jsx
-│   │   │   └── index.js            # Barrel exports
-│   │   │
-│   │   ├── cv/             # CV-related components
+│   │   │   └── index.js
+│   │   ├── cv/             # CV preview components
 │   │   │   ├── CVPreview.jsx       # Full + Modal preview
 │   │   │   └── index.js
-│   │   │
-│   │   └── feedback/       # Feedback flow components
-│   │       ├── FeedbackResults.jsx # Score cards, items, strengths
+│   │   ├── layout/         # Layout components
+│   │   │   ├── Header.jsx          # Logo + nav tabs
+│   │   │   ├── BottomBar.jsx       # Sticky action bar
+│   │   │   ├── StepIndicator.jsx   # Progress steps
+│   │   │   └── index.js
+│   │   ├── forms/          # Form components
+│   │   │   ├── TemplateSelector.jsx
+│   │   │   ├── FileUpload.jsx
+│   │   │   ├── ContactForm.jsx
+│   │   │   └── index.js
+│   │   └── feedback/       # Feedback display
+│   │       ├── FeedbackResults.jsx
 │   │       └── index.js
 │   │
 │   ├── hooks/
 │   │   ├── useGeminiApi.js # Shared AI API logic
+│   │   ├── useCvState.js   # Shared CV/template state
 │   │   └── index.js
 │   │
 │   ├── styles/
-│   │   └── index.css       # Full design system (~2200 lines, see CSS.md)
+│   │   └── index.css       # Full design system (~2900 lines, see CSS.md)
 │   │
 │   ├── templates/
 │   │   └── baseCv.js       # Lilla's base CV as HTML string
@@ -152,22 +176,18 @@ Returns full structured CV data (not changes). Conditional sections are omitted 
 |------|------|---------|
 | `useToast` | `components/ui/Toast.jsx` | Toast state management |
 | `useGeminiApi` | `hooks/useGeminiApi.js` | Shared API call logic |
+| `useCvState` | `hooks/useCvState.js` | CV, template, highlight, zoom state |
+| `useTailorFlow` | `features/tailor/useTailorFlow.js` | Tailor mode logic |
+| `useFeedbackFlow` | `features/feedback/useFeedbackFlow.js` | Feedback mode logic |
+| `useCreateFlow` | `features/create/useCreateFlow.js` | Create mode logic |
 
 ## State Management
 
-Key states in `App.jsx`:
-- `flowStep`: 0 (input), 1 (feedback/result), 2 (final result for feedback)
+App.jsx is now a thin shell (~45 lines) with only:
 - `activeMode`: 'create' | 'tailor' | 'feedback'
-- `feedback`: Analysis with `items[].approved` for selection
-- `showHighlights`: Toggle for change visibility
-- `createSourceType`: 'text' | 'image' | 'html' (for create mode)
-- `createSourceText`: Pasted experience text
-- `createSourceImage`: Uploaded screenshot { file, base64, preview }
-- `createContactInfo`: Object { name, email, phone, location }
-- `includeEducation` / `includeCertifications`: Booleans for optional sections
-- `createEducation` / `createCertifications`: Raw text for optional sections
-- `experienceSectionOpen` / `jobSectionOpen`: UI expansion states
-- `isContactFilled`: Progressive disclosure gate (name length > 0)
+- Shared `cvState` from `useCvState` hook
+
+Each flow manages its own state via dedicated hooks (`useTailorFlow`, `useFeedbackFlow`, `useCreateFlow`).
 
 ## Key Files to Edit
 
@@ -184,3 +204,7 @@ Key states in `App.jsx`:
 | Change styles | `src/styles/index.css` (see CSS.md) |
 | Add/modify UI components | `src/components/ui/` |
 | Add/modify hooks | `src/hooks/` |
+| Modify Tailor flow | `src/features/tailor/` |
+| Modify Feedback flow | `src/features/feedback/` |
+| Modify Create flow | `src/features/create/` |
+
