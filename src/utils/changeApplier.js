@@ -97,15 +97,18 @@ function applyReplaceChange(html, change) {
 
     // Try exact match first
     let position = findTextPosition(html, find);
+    let matchType = 'exact';
 
     // If not found, try normalized match
     if (position.index === -1) {
         position = findNormalizedPosition(html, normalizedFind);
+        matchType = 'normalized';
     }
 
     // If still not found, try fuzzy match with longer prefix
     if (position.index === -1) {
         position = findFuzzyPosition(html, normalizedFind);
+        matchType = 'fuzzy';
     }
 
     if (position.index === -1) {

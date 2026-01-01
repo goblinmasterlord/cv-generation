@@ -65,14 +65,15 @@ body {
   background: var(--color-bg-app);
   color: var(--color-text-light);
   line-height: 1.5;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
 }
 
 #root {
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* =====================================================
@@ -80,10 +81,11 @@ body {
    ===================================================== */
 
 .app-flow {
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--color-bg-app);
+  overflow: hidden;
 }
 
 .app-flow__header {
@@ -123,6 +125,9 @@ body {
   display: flex;
   justify-content: center;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  /* Critical for flex scroll containers */
 }
 
 /* =====================================================
@@ -1037,6 +1042,131 @@ body {
 
 .file-upload__remove:hover {
   color: #f87171;
+}
+
+/* Large file upload for Create mode */
+.file-upload--large {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.file-upload__image-preview {
+  position: relative;
+  width: 100%;
+}
+
+.file-upload__image-preview img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.file-upload__image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.file-upload__remove-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.file-upload__remove-btn:hover {
+  background: rgba(248, 113, 113, 0.2);
+  border-color: #f87171;
+  color: #f87171;
+}
+
+/* =====================================================
+   COMPONENTS - Source Type Selector (Create Mode)
+   ===================================================== */
+
+.source-type-selector {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.source-type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.source-type-option:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-light);
+  background: rgba(213, 143, 124, 0.05);
+}
+
+.source-type-option--active {
+  border-color: var(--color-accent);
+  background: rgba(213, 143, 124, 0.15);
+  color: var(--color-accent);
+}
+
+.source-type-option svg {
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.source-type-option--active svg,
+.source-type-option:hover svg {
+  opacity: 1;
+}
+
+/* Large textarea for Create mode */
+.textarea--large {
+  min-height: 240px;
+}
+
+/* Optional label */
+.input-section__optional {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Large button variant */
+.btn--large {
+  padding: var(--space-md) var(--space-2xl);
+  font-size: 0.95rem;
+}
+
+/* Nav tab with icon */
+.nav-tab svg {
+  width: 12px;
+  height: 12px;
+  margin-right: var(--space-xs);
 }
 
 /* =====================================================

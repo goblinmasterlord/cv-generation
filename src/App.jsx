@@ -2,351 +2,21 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import baseCvTemplate from './templates/baseCv'
 import { createTailoringPrompt } from './prompts/tailorCv'
 import { createFeedbackPrompt } from './prompts/feedbackCv'
+import { createCvPrompt, createCvMultimodalPrompt } from './prompts/createCv'
 import { parseCvToText, generateTextRepresentation } from './utils/cvParser'
 import { applyChanges as applyChangesToHtml, stripHighlights, hasHighlights as checkHighlights } from './utils/changeApplier'
+import { generateCvHtml } from './utils/cvGenerator'
 
-// --- Utility Components ---
-
-const Icons = {
-    Download: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>,
-    Refresh: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>,
-    Upload: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>,
-    ZoomIn: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>,
-    ZoomOut: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /></svg>,
-    Maximize: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6" /><path d="M9 21H3v-6" /><path d="M21 3l-7 7" /><path d="M3 21l7-7" /></svg>,
-    Check: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
-    Arrow: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>,
-    ArrowLeft: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>,
-    Tag: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>,
-    Star: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>,
-    Eye: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>,
-    EyeOff: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>,
-    User: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
-    Briefcase: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>,
-    FileText: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>,
-    Close: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>,
-}
-
-// Custom Toast System
-const ToastContainer = ({ toasts }) => (
-    <div className="toast-container">
-        {toasts.map((toast) => (
-            <div key={toast.id} className={`toast toast--${toast.type}`}>
-                <div className="toast__content">{toast.message}</div>
-            </div>
-        ))}
-    </div>
-)
-
-// Perspective Score Cards
-const PerspectiveScores = ({ perspectives }) => {
-    if (!perspectives) return null
-
-    const getScoreClass = (score) => {
-        if (score >= 80) return 'perspective-score--high'
-        if (score >= 60) return 'perspective-score--medium'
-        return 'perspective-score--low'
-    }
-
-    const perspectiveData = [
-        { key: 'content', label: 'Technical Fit', icon: <Icons.FileText />, data: perspectives.content },
-        { key: 'hr', label: 'HR / ATS', icon: <Icons.User />, data: perspectives.hr },
-        { key: 'hiring', label: 'Hiring Manager', icon: <Icons.Briefcase />, data: perspectives.hiring },
-    ]
-
-    return (
-        <div className="perspective-scores">
-            {perspectiveData.map(p => p.data && (
-                <div key={p.key} className="perspective-card">
-                    <div className="perspective-card__header">
-                        <span className="perspective-card__icon">{p.icon}</span>
-                        <span className="perspective-card__label">{p.label}</span>
-                        <span className={`perspective-card__score ${getScoreClass(p.data.score)}`}>
-                            {p.data.score}
-                        </span>
-                    </div>
-                    <p className="perspective-card__summary">{p.data.summary}</p>
-                </div>
-            ))}
-        </div>
-    )
-}
-
-// Feedback Item Component - Selectable
-const FeedbackItem = ({ item, onToggle }) => {
-    const isActionable = item.type !== 'strength'
-    const isApproved = item.approved
-
-    const getIcon = () => {
-        switch (item.type) {
-            case 'strength': return <Icons.Star />
-            case 'improvement': return <Icons.Arrow />
-            case 'keyword': return <Icons.Tag />
-            default: return null
-        }
-    }
-
-    const getPriorityClass = () => {
-        if (!item.priority) return ''
-        return `feedback-item--priority-${item.priority}`
-    }
-
-    return (
-        <div
-            className={`feedback-item feedback-item--${item.type} ${isApproved ? 'feedback-item--approved' : ''} ${isActionable ? 'feedback-item--actionable' : ''} ${getPriorityClass()}`}
-            onClick={() => isActionable && onToggle(item.id)}
-        >
-            <div className="feedback-item__icon">{getIcon()}</div>
-            <div className="feedback-item__content">
-                <div className="feedback-item__meta">
-                    {item.perspective && (
-                        <span className="feedback-item__perspective">{item.perspective}</span>
-                    )}
-                    {item.priority && (
-                        <span className={`feedback-item__priority feedback-item__priority--${item.priority}`}>
-                            {item.priority}
-                        </span>
-                    )}
-                </div>
-                <p className="feedback-item__text">{item.text}</p>
-                {item.action && (
-                    <p className="feedback-item__action">{item.action}</p>
-                )}
-                {item.section && (
-                    <span className="feedback-item__section">{item.section}</span>
-                )}
-            </div>
-            {isActionable && (
-                <div className="feedback-item__toggle">
-                    {isApproved && <Icons.Check />}
-                </div>
-            )}
-        </div>
-    )
-}
-
-// Stepped Loading Overlay
-const SteppedLoadingOverlay = ({ steps, currentStep, title }) => (
-    <div className="flow-loading">
-        <div className="flow-loading__content">
-            {title && <h3 className="flow-loading__title">{title}</h3>}
-            <div className="flow-loading__steps">
-                {steps.map((step, i) => (
-                    <div key={i} className={`flow-loading__step ${i < currentStep ? 'flow-loading__step--done' : ''} ${i === currentStep ? 'flow-loading__step--active' : ''}`}>
-                        <div className="flow-loading__step-icon">
-                            {i < currentStep ? <Icons.Check /> : i === currentStep ? <div className="spinner-small" /> : null}
-                        </div>
-                        <span className="flow-loading__step-text">{step}</span>
-                    </div>
-                ))}
-            </div>
-            <div className="flow-loading__progress">
-                <div
-                    className="flow-loading__progress-bar"
-                    style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                />
-            </div>
-        </div>
-    </div>
-)
-
-// Collapsible Section Component
-const CollapsibleSection = ({ title, icon, count, hint, children, defaultOpen = true }) => {
-    const [isOpen, setIsOpen] = useState(defaultOpen)
-
-    return (
-        <div className={`feedback-section ${isOpen ? 'feedback-section--open' : ''}`}>
-            <button
-                className="feedback-section__header"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                <h3 className="feedback-section__title">
-                    {icon} {title}
-                    <span className="feedback-section__count">{count}</span>
-                    {hint && <span className="feedback-section__hint">{hint}</span>}
-                </h3>
-                <svg
-                    className={`feedback-section__chevron ${isOpen ? 'feedback-section__chevron--open' : ''}`}
-                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                >
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
-            </button>
-            {isOpen && (
-                <div className="feedback-section__content">
-                    {children}
-                </div>
-            )}
-        </div>
-    )
-}
-
-// Compact Strengths Component
-const StrengthsList = ({ strengths }) => (
-    <div className="strengths-compact">
-        {strengths.map(item => (
-            <div key={item.id} className="strength-chip">
-                <Icons.Star />
-                <span>{item.text}</span>
-            </div>
-        ))}
-    </div>
-)
-
-// Feedback Results Component - Interactive
-const FeedbackResults = ({ feedback, onToggleItem }) => {
-    if (!feedback) return null
-
-    const getScoreClass = (score) => {
-        if (score >= 80) return 'feedback-score--high'
-        if (score >= 60) return 'feedback-score--medium'
-        return 'feedback-score--low'
-    }
-
-    // Group items by type
-    const strengths = feedback.items?.filter(i => i.type === 'strength') || []
-    const improvements = feedback.items?.filter(i => i.type === 'improvement') || []
-    const keywords = feedback.items?.filter(i => i.type === 'keyword') || []
-
-    return (
-        <div className="feedback-results">
-            <div className="feedback-header">
-                <div className={`feedback-score ${getScoreClass(feedback.overallScore)}`}>
-                    {feedback.overallScore}
-                </div>
-                <p className="feedback-summary">{feedback.summary}</p>
-            </div>
-
-            {/* Perspective Scores */}
-            <PerspectiveScores perspectives={feedback.perspectives} />
-
-            {/* Compact Strengths */}
-            {strengths.length > 0 && (
-                <CollapsibleSection
-                    title="Strengths"
-                    icon={<Icons.Star />}
-                    count={strengths.length}
-                    defaultOpen={false}
-                >
-                    <StrengthsList strengths={strengths} />
-                </CollapsibleSection>
-            )}
-
-            {/* Improvements - Main Focus */}
-            {improvements.length > 0 && (
-                <CollapsibleSection
-                    title="Improvements"
-                    icon={<Icons.Arrow />}
-                    count={improvements.length}
-                    hint="Click to approve"
-                    defaultOpen={true}
-                >
-                    <div className="feedback-items">
-                        {improvements.map(item => (
-                            <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
-                        ))}
-                    </div>
-                </CollapsibleSection>
-            )}
-
-            {/* Keywords */}
-            {keywords.length > 0 && (
-                <CollapsibleSection
-                    title="Missing Keywords"
-                    icon={<Icons.Tag />}
-                    count={keywords.length}
-                    hint="Click to add"
-                    defaultOpen={true}
-                >
-                    <div className="feedback-items">
-                        {keywords.map(item => (
-                            <FeedbackItem key={item.id} item={item} onToggle={onToggleItem} />
-                        ))}
-                    </div>
-                </CollapsibleSection>
-            )}
-        </div>
-    )
-}
-
-// CV Preview Modal/Drawer
-const CVPreviewModal = ({ isOpen, onClose, cvHtml, showHighlights, onToggleHighlights, hasHighlights }) => {
-    if (!isOpen) return null
-
-    return (
-        <div className="cv-modal-overlay" onClick={onClose}>
-            <div className="cv-modal" onClick={e => e.stopPropagation()}>
-                <div className="cv-modal__header">
-                    <h2 className="cv-modal__title">CV Preview</h2>
-                    <div className="cv-modal__actions">
-                        {hasHighlights && (
-                            <button
-                                className={`btn btn--secondary ${showHighlights ? 'btn--active' : ''}`}
-                                onClick={onToggleHighlights}
-                            >
-                                {showHighlights ? <Icons.Eye /> : <Icons.EyeOff />}
-                                <span>{showHighlights ? 'Showing Changes' : 'Changes Hidden'}</span>
-                            </button>
-                        )}
-                        <button className="cv-modal__close" onClick={onClose}>
-                            <Icons.Close />
-                        </button>
-                    </div>
-                </div>
-                <div className="cv-modal__content">
-                    <iframe
-                        srcDoc={cvHtml}
-                        title="CV Preview"
-                        className="cv-modal__iframe"
-                    />
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// CV Preview Component (Full view for result steps)
-const CVPreviewFull = ({ cvHtml, showHighlights, onToggleHighlights, hasHighlights, zoom, setZoom }) => (
-    <div className="cv-preview-full">
-        <div className="cv-preview-full__controls">
-            {hasHighlights && (
-                <button
-                    className={`preview-control-btn ${showHighlights ? 'preview-control-btn--active' : ''}`}
-                    onClick={onToggleHighlights}
-                >
-                    {showHighlights ? <Icons.Eye /> : <Icons.EyeOff />}
-                    <span>{showHighlights ? 'Changes Visible' : 'Changes Hidden'}</span>
-                </button>
-            )}
-            <div className="zoom-controls-inline">
-                <button className="zoom-btn" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} title="Zoom Out">
-                    <Icons.ZoomOut />
-                </button>
-                <span className="zoom-value">{Math.round(zoom * 100)}%</span>
-                <button className="zoom-btn" onClick={() => setZoom(z => Math.min(1.5, z + 0.1))} title="Zoom In">
-                    <Icons.ZoomIn />
-                </button>
-            </div>
-        </div>
-        <div className="cv-preview-full__container">
-            <div
-                className="cv-preview-full__document"
-                style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}
-            >
-                <iframe
-                    srcDoc={cvHtml}
-                    title="CV Preview"
-                    className="cv-preview-full__iframe"
-                />
-            </div>
-        </div>
-    </div>
-)
+// Extracted Components
+import { Icons, ToastContainer, useToast, SteppedLoadingOverlay } from './components/ui'
+import { CVPreviewFull, CVPreviewModal } from './components/cv'
+import { FeedbackResults } from './components/feedback'
+import { useGeminiApi } from './hooks'
 
 function App() {
     // Mode and Flow State
-    const [activeMode, setActiveMode] = useState('tailor') // 'tailor' | 'feedback'
-    const [flowStep, setFlowStep] = useState(0) // 0 = input, 1 = result (tailor) or feedback (feedback), 2 = result (feedback only)
+    const [activeMode, setActiveMode] = useState('tailor') // 'tailor' | 'feedback' | 'create'
+    const [flowStep, setFlowStep] = useState(0) // 0 = input, 1 = result (tailor/create) or feedback (feedback), 2 = result (feedback only)
 
     // Input State
     const [jobDescription, setJobDescription] = useState('')
@@ -355,6 +25,12 @@ function App() {
     const [templateMode, setTemplateMode] = useState('base')
     const [customFileName, setCustomFileName] = useState('')
 
+    // Create Mode Input State
+    const [createSourceType, setCreateSourceType] = useState('text') // 'text' | 'image' | 'html'
+    const [createSourceText, setCreateSourceText] = useState('')
+    const [createSourceImage, setCreateSourceImage] = useState(null) // { file, base64, preview }
+    const [createSourceFileName, setCreateSourceFileName] = useState('')
+
     // Loading State
     const [isLoading, setIsLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState(0)
@@ -362,23 +38,17 @@ function App() {
     const [applyStep, setApplyStep] = useState(0)
 
     // UI State
-    const [toasts, setToasts] = useState([])
+    const { toasts, addToast } = useToast()
     const [zoom, setZoom] = useState(1)
     const [feedback, setFeedback] = useState(null)
     const [showHighlights, setShowHighlights] = useState(true)
     const [showCvModal, setShowCvModal] = useState(false)
 
     const fileInputRef = useRef(null)
+    const createFileInputRef = useRef(null)
 
-    // --- Helpers ---
-
-    const addToast = useCallback((message, type = 'success') => {
-        const id = Date.now()
-        setToasts(prev => [...prev, { id, message, type }])
-        setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== id))
-        }, 3000)
-    }, [])
+    // Hooks
+    const { callGemini, callGeminiMultimodal, parseJsonResponse } = useGeminiApi(addToast)
 
     // Reset flow step when mode changes
     useEffect(() => {
@@ -386,11 +56,9 @@ function App() {
         setFeedback(null)
     }, [activeMode])
 
-    // Count approved items
     // Count approved items that have find/replace data (or legacy action field)
     const approvedCount = feedback?.items?.filter(i => {
         if (!i.approved) return false
-        // Check for new format (find/replace) or legacy format (action)
         return (i.find && i.replace) || i.action
     }).length || 0
 
@@ -434,9 +102,6 @@ function App() {
         setLoadingStep(0)
 
         try {
-            const apiKey = import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
-            if (!apiKey) throw new Error('API key not configured')
-
             // Step 1: Parse CV to text
             setLoadingStep(1)
             const parsed = parseCvToText(currentCv)
@@ -446,36 +111,11 @@ function App() {
             // Step 2: Get structured changes from AI
             setLoadingStep(2)
             const prompt = createTailoringPrompt(jobDescription, cvText, currentCv, userComments)
-
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
-                    })
-                }
-            )
-
-            if (!response.ok) throw new Error(`API request failed: ${response.status}`)
-
-            const data = await response.json()
-            const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-            if (!responseText) throw new Error('No response from AI')
+            const responseText = await callGemini(prompt, { temperature: 0.7 })
 
             // Step 3: Parse JSON response and apply changes
             setLoadingStep(3)
-            const cleanJson = responseText
-                .replace(/^```json\n?/i, '')
-                .replace(/\n?```$/i, '')
-                .trim()
-
-            console.log('AI response:', cleanJson.substring(0, 500))
-
-            const tailorData = JSON.parse(cleanJson)
+            const tailorData = parseJsonResponse(responseText)
             const changes = tailorData.changes || []
 
             console.log('Changes to apply:', changes.length)
@@ -486,7 +126,7 @@ function App() {
 
             setCurrentCv(result.html)
             setShowHighlights(true)
-            setFlowStep(1) // Move to result step
+            setFlowStep(1)
 
             const { applied, failed } = result.summary
             if (failed > 0) {
@@ -495,7 +135,6 @@ function App() {
                 addToast(`CV tailored with ${applied} changes!`, 'success')
             }
 
-
         } catch (error) {
             console.error('Tailoring error:', error)
             addToast(error.message || 'Failed to tailor CV', 'error')
@@ -503,7 +142,7 @@ function App() {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [jobDescription, currentCv, userComments, addToast])
+    }, [jobDescription, currentCv, userComments, addToast, callGemini, parseJsonResponse])
 
     const handleFeedback = useCallback(async () => {
         if (!jobDescription.trim()) {
@@ -516,9 +155,6 @@ function App() {
         setFeedback(null)
 
         try {
-            const apiKey = import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
-            if (!apiKey) throw new Error('API key not configured')
-
             // Step 1: Parse CV to text
             setLoadingStep(1)
             const parsed = parseCvToText(currentCv)
@@ -527,35 +163,12 @@ function App() {
             // Step 2: Get feedback from AI
             setLoadingStep(2)
             const prompt = createFeedbackPrompt(jobDescription, cvText, currentCv)
-
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.5, maxOutputTokens: 8192 }
-                    })
-                }
-            )
-
-            if (!response.ok) throw new Error(`API request failed: ${response.status}`)
-
-            const data = await response.json()
-            const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-            if (!responseText) throw new Error('No response from AI')
+            const responseText = await callGemini(prompt, { temperature: 0.5 })
 
             setLoadingStep(3)
             await new Promise(r => setTimeout(r, 300))
 
-            const cleanJson = responseText
-                .replace(/^```json\n?/i, '')
-                .replace(/\n?```$/i, '')
-                .trim()
-
-            const feedbackData = JSON.parse(cleanJson)
+            const feedbackData = parseJsonResponse(responseText)
 
             feedbackData.items = feedbackData.items?.map(item => ({
                 ...item,
@@ -563,7 +176,7 @@ function App() {
             })) || []
 
             setFeedback(feedbackData)
-            setFlowStep(1) // Move to feedback step
+            setFlowStep(1)
             addToast('Deep analysis complete!')
 
         } catch (error) {
@@ -573,7 +186,7 @@ function App() {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [jobDescription, currentCv, addToast])
+    }, [jobDescription, currentCv, addToast, callGemini, parseJsonResponse])
 
     const handleToggleItem = useCallback((itemId) => {
         setFeedback(prev => ({
@@ -585,17 +198,13 @@ function App() {
     }, [])
 
     const handleApplyChanges = useCallback(async () => {
-        // Get approved items that have find/replace data
         const approvedItems = feedback?.items?.filter(i => {
             if (!i.approved) return false
             return i.find && i.replace
         }) || []
 
         if (approvedItems.length === 0) {
-            // Check what approved items we DO have
             const allApproved = feedback?.items?.filter(i => i.approved) || []
-
-            // Fallback: check if there are items with action but no find/replace
             const legacyItems = feedback?.items?.filter(i => i.approved && i.action) || []
             if (legacyItems.length > 0) {
                 addToast('Selected items don\'t have replacement data. Please re-analyze.', 'error')
@@ -612,13 +221,11 @@ function App() {
         setApplyStep(0)
 
         try {
-            // Simulate stepped progress
             for (let i = 0; i < steps.length - 1; i++) {
                 setApplyStep(i)
                 await new Promise(r => setTimeout(r, 300))
             }
 
-            // Apply changes programmatically - NO AI CALL NEEDED!
             const result = applyChangesToHtml(currentCv, approvedItems)
 
             setApplyStep(steps.length - 1)
@@ -626,7 +233,7 @@ function App() {
 
             setCurrentCv(result.html)
             setShowHighlights(true)
-            setFlowStep(2) // Move to result step in feedback flow
+            setFlowStep(2)
 
             const { applied, failed } = result.summary
             if (failed > 0) {
@@ -665,6 +272,99 @@ function App() {
             addToast('Please upload HTML or Image', 'error')
         }
     }, [addToast])
+
+    const handleCreateFileUpload = useCallback((event) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        if (file.type === 'text/html' || file.name.endsWith('.html')) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                const parsed = parseCvToText(e.target.result)
+                const textContent = generateTextRepresentation(parsed)
+                setCreateSourceText(textContent)
+                setCreateSourceType('html')
+                setCreateSourceFileName(file.name)
+                setCreateSourceImage(null)
+                addToast('HTML CV loaded - content extracted')
+            }
+            reader.readAsText(file)
+        } else if (file.type.startsWith('image/')) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setCreateSourceImage({
+                    file: file,
+                    base64: e.target.result,
+                    preview: e.target.result
+                })
+                setCreateSourceType('image')
+                setCreateSourceFileName(file.name)
+                setCreateSourceText('')
+                addToast('Screenshot uploaded')
+            }
+            reader.readAsDataURL(file)
+        } else {
+            addToast('Please upload HTML or image file', 'error')
+        }
+    }, [addToast])
+
+    const handleCreate = useCallback(async () => {
+        if (!jobDescription.trim()) {
+            addToast('Please enter a job description', 'error')
+            return
+        }
+
+        if (createSourceType === 'text' && !createSourceText.trim()) {
+            addToast('Please enter your experience information', 'error')
+            return
+        }
+        if (createSourceType === 'image' && !createSourceImage) {
+            addToast('Please upload a CV screenshot', 'error')
+            return
+        }
+
+        setIsLoading(true)
+        setLoadingStep(0)
+
+        try {
+            let responseText
+
+            if (createSourceType === 'image' && createSourceImage) {
+                setLoadingStep(1)
+                const prompt = createCvMultimodalPrompt(jobDescription, userComments)
+
+                setLoadingStep(2)
+                responseText = await callGeminiMultimodal(prompt, {
+                    base64: createSourceImage.base64,
+                    mimeType: createSourceImage.file.type
+                }, { temperature: 0.7 })
+            } else {
+                setLoadingStep(1)
+                const sourceText = createSourceType === 'text' ? createSourceText : createSourceText
+                const prompt = createCvPrompt(jobDescription, sourceText, userComments)
+
+                setLoadingStep(2)
+                responseText = await callGemini(prompt, { temperature: 0.7 })
+            }
+
+            setLoadingStep(3)
+            const cvData = parseJsonResponse(responseText)
+
+            const generatedHtml = generateCvHtml(cvData)
+            setCurrentCv(generatedHtml)
+            setShowHighlights(true)
+            setFlowStep(1)
+
+            addToast('CV created successfully!')
+
+        } catch (error) {
+            console.error('Create CV error:', error)
+            addToast(error.message || 'Failed to create CV', 'error')
+        } finally {
+            setIsLoading(false)
+            setLoadingStep(0)
+        }
+    }, [jobDescription, createSourceType, createSourceText, createSourceImage, userComments, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
 
     const handleDownload = useCallback(() => {
         const exportHtml = getExportCv()
@@ -708,6 +408,9 @@ function App() {
         if (activeMode === 'tailor') {
             return ['Analyzing Job Description...', 'Tailoring Experience & Skills...', 'Formatting Document...']
         }
+        if (activeMode === 'create') {
+            return ['Extracting CV Data...', 'Analyzing Job Requirements...', 'Generating Tailored CV...', 'Formatting Document...']
+        }
         return ['Reading Your CV...', 'Deep Analysis in Progress...', 'Generating Recommendations...']
     }
 
@@ -716,9 +419,8 @@ function App() {
 
     // --- Render ---
 
-    // Step indicator
     const getStepIndicator = () => {
-        if (activeMode === 'tailor') {
+        if (activeMode === 'tailor' || activeMode === 'create') {
             return (
                 <div className="step-indicator">
                     <div className={`step-indicator__item ${flowStep === 0 ? 'step-indicator__item--active' : ''} ${flowStep > 0 ? 'step-indicator__item--done' : ''}`}>
@@ -753,20 +455,22 @@ function App() {
         )
     }
 
-    // Render step content
     const renderStepContent = () => {
-        // Loading overlay
         if (isLoading) {
+            const loadingTitles = {
+                tailor: 'Tailoring Your CV',
+                feedback: 'Analyzing Your CV',
+                create: 'Creating Your CV'
+            }
             return (
                 <SteppedLoadingOverlay
                     steps={loadingSteps}
                     currentStep={loadingStep}
-                    title={activeMode === 'tailor' ? 'Tailoring Your CV' : 'Analyzing Your CV'}
+                    title={loadingTitles[activeMode]}
                 />
             )
         }
 
-        // Apply loading overlay
         if (isApplying) {
             return (
                 <SteppedLoadingOverlay
@@ -777,12 +481,11 @@ function App() {
             )
         }
 
-        // Step 0: Input
-        if (flowStep === 0) {
+        // Step 0: Input for Tailor/Feedback modes
+        if (flowStep === 0 && activeMode !== 'create') {
             return (
                 <div className="flow-step flow-step--input">
                     <div className="flow-step__content">
-                        {/* Template Selection */}
                         <section className="input-section">
                             <div className="input-section__header">
                                 <h2 className="input-section__title">CV Template</h2>
@@ -828,7 +531,6 @@ function App() {
 
                         <div className="divider">Job Details</div>
 
-                        {/* Job Description */}
                         <section className="input-section">
                             <div className="input-section__header">
                                 <h2 className="input-section__title">Job Description</h2>
@@ -842,7 +544,6 @@ function App() {
                             <div className="char-count">{jobDescription.length} chars</div>
                         </section>
 
-                        {/* User Notes - Only in Tailor mode */}
                         {activeMode === 'tailor' && (
                             <section className="input-section">
                                 <div className="input-section__header">
@@ -861,8 +562,174 @@ function App() {
             )
         }
 
+        // Step 0: Input for Create mode
+        if (flowStep === 0 && activeMode === 'create') {
+            return (
+                <div className="flow-step flow-step--input">
+                    <div className="flow-step__content">
+                        <section className="input-section">
+                            <div className="input-section__header">
+                                <h2 className="input-section__title">Your Experience</h2>
+                                <p className="input-section__subtitle">Provide your background in one of these formats</p>
+                            </div>
+                            <div className="source-type-selector">
+                                <button
+                                    className={`source-type-option ${createSourceType === 'text' ? 'source-type-option--active' : ''}`}
+                                    onClick={() => setCreateSourceType('text')}
+                                >
+                                    <Icons.Text />
+                                    <span>Paste Text</span>
+                                </button>
+                                <button
+                                    className={`source-type-option ${createSourceType === 'image' ? 'source-type-option--active' : ''}`}
+                                    onClick={() => setCreateSourceType('image')}
+                                >
+                                    <Icons.Image />
+                                    <span>Screenshot</span>
+                                </button>
+                                <button
+                                    className={`source-type-option ${createSourceType === 'html' ? 'source-type-option--active' : ''}`}
+                                    onClick={() => setCreateSourceType('html')}
+                                >
+                                    <Icons.Upload />
+                                    <span>HTML File</span>
+                                </button>
+                            </div>
+
+                            {createSourceType === 'text' && (
+                                <textarea
+                                    className="textarea textarea--large"
+                                    placeholder="Paste your experience, LinkedIn summary, resume bullets, or describe your background...
+
+Example:
+- Software Engineer at Google (2020-2023)
+- Led team of 5 on search infrastructure
+- MSc Computer Science, Stanford 2020"
+                                    value={createSourceText}
+                                    onChange={(e) => setCreateSourceText(e.target.value)}
+                                />
+                            )}
+
+                            {createSourceType === 'image' && (
+                                <div
+                                    className={`file-upload file-upload--large ${createSourceImage ? 'file-upload--active' : ''}`}
+                                    onClick={() => !createSourceImage && createFileInputRef.current?.click()}
+                                >
+                                    {createSourceImage ? (
+                                        <div className="file-upload__image-preview">
+                                            <img src={createSourceImage.preview} alt="CV Preview" />
+                                            <div className="file-upload__image-overlay">
+                                                <span className="file-upload__filename">{createSourceFileName}</span>
+                                                <button
+                                                    className="file-upload__remove-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setCreateSourceImage(null);
+                                                        setCreateSourceFileName('');
+                                                    }}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Icons.Image />
+                                            <p className="file-upload__text">Upload CV Screenshot</p>
+                                            <p className="file-upload__hint">PNG, JPG, or PDF screenshot</p>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {createSourceType === 'html' && (
+                                <div
+                                    className={`file-upload ${createSourceFileName && createSourceType === 'html' ? 'file-upload--active' : ''}`}
+                                    onClick={() => !(createSourceFileName && createSourceType === 'html') && createFileInputRef.current?.click()}
+                                >
+                                    {createSourceFileName && createSourceType === 'html' ? (
+                                        <div className="file-upload__preview">
+                                            <span className="file-upload__filename">{createSourceFileName}</span>
+                                            <span
+                                                className="file-upload__remove"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCreateSourceText('');
+                                                    setCreateSourceFileName('');
+                                                }}
+                                            >
+                                                Remove
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Icons.Upload />
+                                            <p className="file-upload__text">Upload HTML CV</p>
+                                            <p className="file-upload__hint">We'll extract the content</p>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            <input
+                                ref={createFileInputRef}
+                                type="file"
+                                accept={createSourceType === 'image' ? 'image/*' : '.html'}
+                                onChange={handleCreateFileUpload}
+                                style={{ display: 'none' }}
+                            />
+                        </section>
+
+                        <div className="divider">Target Job</div>
+
+                        <section className="input-section">
+                            <div className="input-section__header">
+                                <h2 className="input-section__title">Job Description</h2>
+                            </div>
+                            <textarea
+                                className="textarea"
+                                placeholder="Paste the job posting you're applying for..."
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                            />
+                            <div className="char-count">{jobDescription.length} chars</div>
+                        </section>
+
+                        <section className="input-section">
+                            <div className="input-section__header">
+                                <h2 className="input-section__title">Additional Notes</h2>
+                                <span className="input-section__optional">Optional</span>
+                            </div>
+                            <textarea
+                                className="textarea textarea--small"
+                                placeholder="Any specific focus or preferences..."
+                                value={userComments}
+                                onChange={(e) => setUserComments(e.target.value)}
+                            />
+                        </section>
+                    </div>
+                </div>
+            )
+        }
+
         // Step 1 for Tailor: Result
         if (activeMode === 'tailor' && flowStep === 1) {
+            return (
+                <div className="flow-step flow-step--result">
+                    <CVPreviewFull
+                        cvHtml={getDisplayCv()}
+                        showHighlights={showHighlights}
+                        onToggleHighlights={() => setShowHighlights(!showHighlights)}
+                        hasHighlights={hasHighlights}
+                        zoom={zoom}
+                        setZoom={setZoom}
+                    />
+                </div>
+            )
+        }
+
+        // Step 1 for Create: Result
+        if (activeMode === 'create' && flowStep === 1) {
             return (
                 <div className="flow-step flow-step--result">
                     <CVPreviewFull
@@ -910,10 +777,8 @@ function App() {
         return null
     }
 
-    // Render bottom bar actions
     const renderBottomBarActions = () => {
-        // Step 0: Input step
-        if (flowStep === 0) {
+        if (flowStep === 0 && activeMode !== 'create') {
             return (
                 <>
                     <button
@@ -933,7 +798,23 @@ function App() {
             )
         }
 
-        // Tailor Step 1: Result
+        if (flowStep === 0 && activeMode === 'create') {
+            const hasSource = createSourceType === 'text' ? createSourceText.trim() :
+                createSourceType === 'image' ? createSourceImage :
+                    createSourceFileName
+            return (
+                <>
+                    <button
+                        className="btn btn--primary btn--large"
+                        onClick={handleCreate}
+                        disabled={isLoading || !jobDescription.trim() || !hasSource}
+                    >
+                        <Icons.Plus /> Create CV
+                    </button>
+                </>
+            )
+        }
+
         if (activeMode === 'tailor' && flowStep === 1) {
             return (
                 <>
@@ -951,7 +832,28 @@ function App() {
             )
         }
 
-        // Feedback Step 1: Feedback Dashboard
+        if (activeMode === 'create' && flowStep === 1) {
+            return (
+                <>
+                    <button className="btn btn--secondary" onClick={handleBack}>
+                        <Icons.ArrowLeft /> Back
+                    </button>
+                    <div className="bottom-bar__spacer" />
+                    <button className="btn btn--secondary" onClick={() => {
+                        setFlowStep(0)
+                        setCreateSourceText('')
+                        setCreateSourceImage(null)
+                        setCreateSourceFileName('')
+                    }}>
+                        <Icons.Refresh /> Start Over
+                    </button>
+                    <button className="btn btn--primary" onClick={handleDownload}>
+                        <Icons.Download /> Download
+                    </button>
+                </>
+            )
+        }
+
         if (activeMode === 'feedback' && flowStep === 1) {
             return (
                 <>
@@ -973,7 +875,6 @@ function App() {
             )
         }
 
-        // Feedback Step 2: Result
         if (activeMode === 'feedback' && flowStep === 2) {
             return (
                 <>
@@ -998,10 +899,15 @@ function App() {
         <div className="app-flow">
             <ToastContainer toasts={toasts} />
 
-            {/* Header */}
             <header className="app-flow__header">
                 <div className="app__logo">CV Generator</div>
                 <nav className="app__nav">
+                    <button
+                        className={`nav-tab ${activeMode === 'create' ? 'nav-tab--active' : ''}`}
+                        onClick={() => setActiveMode('create')}
+                    >
+                        <Icons.Plus /> Create New
+                    </button>
                     <button
                         className={`nav-tab ${activeMode === 'tailor' ? 'nav-tab--active' : ''}`}
                         onClick={() => setActiveMode('tailor')}
@@ -1017,24 +923,20 @@ function App() {
                 </nav>
             </header>
 
-            {/* Step Indicator */}
             <div className="app-flow__steps">
                 {getStepIndicator()}
             </div>
 
-            {/* Main Content */}
             <main className="app-flow__main">
                 {renderStepContent()}
             </main>
 
-            {/* Sticky Bottom Bar */}
             <div className="bottom-bar">
                 <div className="bottom-bar__content">
                     {renderBottomBarActions()}
                 </div>
             </div>
 
-            {/* CV Preview Modal */}
             <CVPreviewModal
                 isOpen={showCvModal}
                 onClose={() => setShowCvModal(false)}
