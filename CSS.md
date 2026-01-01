@@ -38,7 +38,11 @@ Quick reference for `src/styles/index.css` (~2200 lines).
 | **Apply Loading** | 1860-1950 | Progress during apply |
 | **Preview Controls** | 1952-1988 | Eye toggle, zoom inline |
 | **Feedback Meta** | 1990-2036 | Priority badges, perspectives |
-| **Mobile Responsive** | 2038-2196 | `@media (max-width: 900px)` |
+| **Mobile Responsive** | 2038-2230 | **[NEW]** Premium mobile experience |
+| **Mobile Header** | 2050-2106 | Column layout, compact pill tabs |
+| **Mobile Steps** | 2108-2150 | Fixed position (top: 100px) compact indicator |
+| **Mobile Main** | 2154-2189 | Fixed positioned scroll area (top: 160px layout) |
+| **Mobile Components** | 2191-2230 | Stacked selectors, vertical bottom bar |
 
 ## Key CSS Variables
 
@@ -59,6 +63,6 @@ Quick reference for `src/styles/index.css` (~2200 lines).
 | Form inputs | Input Section (640-704) |
 | Loading states | Flow Loading (284-364) or Advanced Loading (1284-1360) |
 | Feedback cards | Feedback Items (1624-1744) |
-| Mobile layout | Mobile Responsive (2038-2196) |
+| Mobile layout | Mobile Responsive (2038-2230) |
 | Toast messages | Toast Notifications (1362-1432) |
 | CV preview | CV Preview Full (366-444) or CV Modal (446-534) |
