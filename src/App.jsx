@@ -5,14 +5,14 @@ import { ToastContainer, useToast } from './components/ui'
 import { Header } from './components/layout'
 
 // Features
-import { TailorFlow, FeedbackFlow, CreateFlow } from './features'
+import { TailorFlow, FeedbackFlow, CreateFlow, InterviewFlow } from './features'
 
 // Hooks
 import { useCvState } from './hooks'
 
 function App() {
     // Mode State
-    const [activeMode, setActiveMode] = useState('tailor') // 'tailor' | 'feedback' | 'create'
+    const [activeMode, setActiveMode] = useState('tailor') // 'tailor' | 'feedback' | 'create' | 'interview'
 
     // Shared State
     const cvState = useCvState()
@@ -37,6 +37,9 @@ function App() {
             )}
             {activeMode === 'create' && (
                 <CreateFlow cvState={cvState} addToast={addToast} />
+            )}
+            {activeMode === 'interview' && (
+                <InterviewFlow cvState={cvState} addToast={addToast} />
             )}
         </div>
     )

@@ -23,6 +23,12 @@ export function Header({ activeMode, onModeChange }) {
                 >
                     Get Feedback
                 </button>
+                <button
+                    className={`nav-tab ${activeMode === 'interview' ? 'nav-tab--active' : ''}`}
+                    onClick={() => onModeChange('interview')}
+                >
+                    Interview Prep
+                </button>
             </nav>
         </header>
     )
