@@ -73,6 +73,20 @@ export function useCreateFlow(cvState, addToast) {
                 addToast('HTML CV loaded - content extracted')
             }
             reader.readAsText(file)
+        } else if (file.type === 'application/pdf') {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setSourceImage({
+                    file: file,
+                    base64: e.target.result,
+                    preview: null // No preview for PDF
+                })
+                setSourceType('pdf') // New source type
+                setSourceFileName(file.name)
+                setSourceText('')
+                addToast('PDF uploaded')
+            }
+            reader.readAsDataURL(file)
         } else if (file.type.startsWith('image/')) {
             const reader = new FileReader()
             reader.onload = (e) => {
@@ -88,7 +102,7 @@ export function useCreateFlow(cvState, addToast) {
             }
             reader.readAsDataURL(file)
         } else {
-            addToast('Please upload HTML or image file', 'error')
+            addToast('Please upload HTML, PDF, or image file', 'error')
         }
     }, [addToast])
 
@@ -105,8 +119,8 @@ export function useCreateFlow(cvState, addToast) {
             addToast('Please enter your experience information', 'error')
             return
         }
-        if (sourceType === 'image' && !sourceImage) {
-            addToast('Please upload a CV screenshot', 'error')
+        if ((sourceType === 'image' || sourceType === 'pdf') && !sourceImage) {
+            addToast('Please upload a CV reference', 'error')
             return
         }
 
@@ -124,7 +138,7 @@ export function useCreateFlow(cvState, addToast) {
         try {
             let responseText
 
-            if (sourceType === 'image' && sourceImage) {
+            if ((sourceType === 'image' || sourceType === 'pdf') && sourceImage) {
                 setLoadingStep(1)
                 const prompt = createCvMultimodalPrompt(jobDescription, userComments, promptOptions)
 

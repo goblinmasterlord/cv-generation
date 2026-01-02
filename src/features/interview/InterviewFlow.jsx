@@ -58,6 +58,13 @@ export function InterviewFlow({ addToast }) {
                                     <span>Paste Text</span>
                                 </button>
                                 <button
+                                    className={`source-type-option ${flow.sourceType === 'pdf' ? 'source-type-option--active' : ''}`}
+                                    onClick={() => handleSourceTypeChange('pdf')}
+                                >
+                                    <Icons.FileText />
+                                    <span>PDF File</span>
+                                </button>
+                                <button
                                     className={`source-type-option ${flow.sourceType === 'image' ? 'source-type-option--active' : ''}`}
                                     onClick={() => handleSourceTypeChange('image')}
                                 >
@@ -89,6 +96,30 @@ export function InterviewFlow({ addToast }) {
                                         onChange={(e) => flow.setSourceText(e.target.value)}
                                     />
                                     <div className="char-count">{flow.sourceText.length} chars</div>
+                                </section>
+                            )}
+
+                            {flow.sourceType === 'pdf' && (
+                                <section className="input-section">
+                                    <div className="input-section__header">
+                                        <h2 className="input-section__title">Upload PDF CV</h2>
+                                    </div>
+                                    <div
+                                        className="file-upload-zone"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        {flow.sourceImage ? ( // We reuse sourceImage state for PDF file data too
+                                            <div className="file-upload-zone__preview">
+                                                <Icons.FileText />
+                                                <span className="file-upload-zone__filename">{flow.sourceFileName}</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <Icons.Upload />
+                                                <span>Click to upload PDF CV</span>
+                                            </>
+                                        )}
+                                    </div>
                                 </section>
                             )}
 
@@ -137,7 +168,7 @@ export function InterviewFlow({ addToast }) {
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept=".html,image/*"
+                                accept={flow.sourceType === 'image' ? 'image/*' : flow.sourceType === 'pdf' ? 'application/pdf' : '.html'}
                                 style={{ display: 'none' }}
                                 onChange={flow.handleFileUpload}
                             />

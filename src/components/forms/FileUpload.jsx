@@ -21,7 +21,7 @@ export function FileUpload({
             onClick={() => !hasFile && inputRef?.current?.click()}
         >
             {hasFile ? (
-                showPreview && value?.preview ? (
+                showPreview && value?.preview && !value?.file?.type?.includes('pdf') && !fileName?.endsWith('.pdf') ? (
                     <div className="file-upload__image-preview">
                         <img src={value.preview} alt="Preview" />
                         <div className="file-upload__image-overlay">
@@ -36,7 +36,10 @@ export function FileUpload({
                     </div>
                 ) : (
                     <div className="file-upload__preview">
-                        <span className="file-upload__filename">{fileName}</span>
+                        <span className="file-upload__filename">
+                            {value?.file?.type === 'application/pdf' || fileName?.endsWith('.pdf') ? <Icons.FileText /> : null}
+                            {fileName}
+                        </span>
                         <span className="file-upload__remove" onClick={(e) => { e.stopPropagation(); onRemove?.(); }}>
                             Remove
                         </span>

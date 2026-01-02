@@ -28,14 +28,32 @@ export function FeedbackFlow({ cvState, addToast }) {
             const reader = new FileReader()
             reader.onload = (e) => {
                 cvState.loadCustomCv(e.target.result, file.name)
+                flow.setSourceFile(null) // Clear PDF if any
                 addToast('Custom template loaded')
             }
             reader.readAsText(file)
+        } else if (file.type === 'application/pdf') {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                // PDF handling - don't load into cvState (which expects HTML)
+                // Instead store in local flow state
+                flow.setSourceFile({
+                    file,
+                    base64: e.target.result
+                })
+                cvState.setCustomFileName(file.name) // Just for display
+                addToast('PDF uploaded for analysis')
+            }
+            reader.readAsDataURL(file)
         } else if (file.type.startsWith('image/')) {
             cvState.setTemplateMode('custom')
+            // For now, image handling is limited in Feedback flow as per original logic, 
+            // but we could add it to sourceFile if improvements needed.
+            // Original logic just said "Using base template".
+            // Let's defer strict image support unless requested, but PDF is priority.
             addToast('Image uploaded (Using base template)', 'success')
         } else {
-            addToast('Please upload HTML or Image', 'error')
+            addToast('Please upload HTML, PDF or Image', 'error')
         }
     }
 

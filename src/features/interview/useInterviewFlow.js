@@ -95,8 +95,8 @@ export function useInterviewFlow(addToast) {
             addToast('Please enter your CV information', 'error')
             return
         }
-        if (sourceType === 'image' && !sourceImage) {
-            addToast('Please upload a CV screenshot', 'error')
+        if ((sourceType === 'image' || sourceType === 'pdf') && !sourceImage) {
+            addToast('Please upload a CV reference', 'error')
             return
         }
 
@@ -106,10 +106,22 @@ export function useInterviewFlow(addToast) {
         try {
             let responseText
 
-            if (sourceType === 'image' && sourceImage) {
+            if (sourceType === 'pdf' && sourceImage) {
+                setLoadingStep(1)
+                const { createInterviewStrategyMultimodalPrompt } = await import('../../prompts/interviewCv')
+                const prompt = createInterviewStrategyMultimodalPrompt(jobDescription, userComments)
+
+                setLoadingStep(2)
+                responseText = await callGeminiMultimodal(prompt, {
+                    base64: sourceImage.base64,
+                    mimeType: 'application/pdf'
+                }, { temperature: 0.7 })
+
+            } else if (sourceType === 'image' && sourceImage) {
                 setLoadingStep(1)
                 // For image input, we need multimodal - but our prompt expects text
                 // So we'll include instruction to extract CV content from image
+                const { createInterviewStrategyPrompt } = await import('../../prompts/interviewCv')
                 const imagePrompt = `First, extract all text content from this CV image. Then use that content to complete the following task:\n\n${createInterviewStrategyPrompt(jobDescription, '[CV content from image above]', userComments)}`
 
                 setLoadingStep(2)
@@ -119,6 +131,7 @@ export function useInterviewFlow(addToast) {
                 }, { temperature: 0.7 })
             } else {
                 setLoadingStep(1)
+                const { createInterviewStrategyPrompt } = await import('../../prompts/interviewCv')
                 const prompt = createInterviewStrategyPrompt(jobDescription, sourceText, userComments)
 
                 setLoadingStep(2)
@@ -161,14 +174,29 @@ export function useInterviewFlow(addToast) {
                 uniqueValue: strategyData.cvHighlights?.uniqueValue || ''
             }
 
-            const cvContent = sourceType === 'image'
-                ? '[CV content previously analyzed from image]'
-                : sourceText
+            let responseText
 
-            const prompt = createTechnicalQuestionsPrompt(jobDescription, cvContent, strategyContext)
+            if (sourceType === 'pdf' && sourceImage) {
+                const { createTechnicalQuestionsMultimodalPrompt } = await import('../../prompts/interviewCv')
+                const prompt = createTechnicalQuestionsMultimodalPrompt(jobDescription, strategyContext)
 
-            setLoadingStep(2)
-            const responseText = await callGemini(prompt, { temperature: 0.7 })
+                setLoadingStep(2)
+                responseText = await callGeminiMultimodal(prompt, {
+                    base64: sourceImage.base64,
+                    mimeType: 'application/pdf'
+                }, { temperature: 0.7 })
+
+            } else {
+                const cvContent = sourceType === 'image'
+                    ? '[CV content previously analyzed from image]'
+                    : sourceText
+
+                const { createTechnicalQuestionsPrompt } = await import('../../prompts/interviewCv')
+                const prompt = createTechnicalQuestionsPrompt(jobDescription, cvContent, strategyContext)
+
+                setLoadingStep(2)
+                responseText = await callGemini(prompt, { temperature: 0.7 })
+            }
 
             setLoadingStep(3)
             const data = parseJsonResponse(responseText)
@@ -184,7 +212,7 @@ export function useInterviewFlow(addToast) {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [strategyData, sourceType, sourceText, jobDescription, addToast, callGemini, parseJsonResponse])
+    }, [strategyData, sourceType, sourceText, sourceImage, jobDescription, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
 
     const handleBack = useCallback(() => {
         if (step > 0) setStep(step - 1)

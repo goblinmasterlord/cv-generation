@@ -1,6 +1,6 @@
 import { Icons } from '../ui'
 
-export function TemplateSelector({ mode, onModeChange, fileName, onUpload, onReset, fileInputRef }) {
+export function TemplateSelector({ mode, onModeChange, fileName, onUpload, onReset, fileInputRef, allowPdf = false }) {
     return (
         <section className="input-section">
             <div className="input-section__header">
@@ -17,7 +17,7 @@ export function TemplateSelector({ mode, onModeChange, fileName, onUpload, onRes
                     className={`template-option ${mode === 'custom' ? 'template-option--active' : ''}`}
                     onClick={() => onModeChange('custom')}
                 >
-                    Upload Custom
+                    {allowPdf ? 'Upload Custom / PDF' : 'Upload Custom Template'}
                 </button>
             </div>
 
@@ -28,7 +28,10 @@ export function TemplateSelector({ mode, onModeChange, fileName, onUpload, onRes
                 >
                     {fileName ? (
                         <div className="file-upload__preview">
-                            <span className="file-upload__filename">{fileName}</span>
+                            <span className="file-upload__filename">
+                                {fileName.endsWith('.pdf') ? <Icons.FileText /> : null}
+                                {fileName}
+                            </span>
                             <span className="file-upload__remove" onClick={(e) => { e.stopPropagation(); onReset(); }}>
                                 Remove
                             </span>
@@ -36,13 +39,23 @@ export function TemplateSelector({ mode, onModeChange, fileName, onUpload, onRes
                     ) : (
                         <>
                             <Icons.Upload />
-                            <p className="file-upload__text">Upload HTML or Screenshot</p>
-                            <p className="file-upload__hint">Drag & drop to replace base template</p>
+                            <p className="file-upload__text">
+                                {allowPdf ? 'Upload HTML, PDF or Screenshot' : 'Upload HTML or Screenshot'}
+                            </p>
+                            <p className="file-upload__hint">
+                                {allowPdf ? 'Drag & drop to analyze your CV' : 'Drag & drop to replace base template'}
+                            </p>
                         </>
                     )}
                 </div>
             )}
-            <input ref={fileInputRef} type="file" accept=".html,image/*" onChange={onUpload} style={{ display: 'none' }} />
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept={allowPdf ? ".html,.pdf,image/*" : ".html,image/*"}
+                onChange={onUpload}
+                style={{ display: 'none' }}
+            />
         </section>
     )
 }

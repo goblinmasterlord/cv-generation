@@ -14,10 +14,11 @@ export function useFeedbackFlow(cvState, addToast) {
     const [loadingStep, setLoadingStep] = useState(0)
     const [isApplying, setIsApplying] = useState(false)
     const [applyStep, setApplyStep] = useState(0)
+    const [sourceFile, setSourceFile] = useState(null) // { file, base64 }
     const [feedback, setFeedback] = useState(null)
     const [jobDescription, setJobDescription] = useState('')
 
-    const { callGemini, parseJsonResponse } = useGeminiApi(addToast)
+    const { callGemini, callGeminiMultimodal, parseJsonResponse } = useGeminiApi(addToast)
 
     const loadingSteps = [
         'Reading Your CV...',
@@ -55,12 +56,29 @@ export function useFeedbackFlow(cvState, addToast) {
 
         try {
             setLoadingStep(1)
-            const parsed = parseCvToText(cvState.currentCv)
-            const cvText = generateTextRepresentation(parsed)
+            let responseText
 
-            setLoadingStep(2)
-            const prompt = createFeedbackPrompt(jobDescription, cvText, cvState.currentCv)
-            const responseText = await callGemini(prompt, { temperature: 0.5 })
+            // Check if we are using PDF mode (sourceFile exists)
+            if (sourceFile && sourceFile.file.type === 'application/pdf') {
+                setLoadingStep(2)
+                // Dynamic import to avoid circular dependency issues if any, but standard import works
+                const { createFeedbackMultimodalPrompt } = await import('../../prompts/feedbackCv')
+                const prompt = createFeedbackMultimodalPrompt(jobDescription)
+
+                responseText = await callGeminiMultimodal(prompt, {
+                    base64: sourceFile.base64,
+                    mimeType: 'application/pdf'
+                }, { temperature: 0.5 })
+
+            } else {
+                // Standard HTML/Text mode
+                const parsed = parseCvToText(cvState.currentCv)
+                const cvText = generateTextRepresentation(parsed)
+
+                setLoadingStep(2)
+                const prompt = createFeedbackPrompt(jobDescription, cvText, cvState.currentCv)
+                responseText = await callGemini(prompt, { temperature: 0.5 })
+            }
 
             setLoadingStep(3)
             await new Promise(r => setTimeout(r, 300))
@@ -82,7 +100,7 @@ export function useFeedbackFlow(cvState, addToast) {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [jobDescription, cvState, addToast, callGemini, parseJsonResponse])
+    }, [jobDescription, cvState, sourceFile, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
 
     const handleToggleItem = useCallback((itemId) => {
         setFeedback(prev => ({
@@ -174,6 +192,9 @@ export function useFeedbackFlow(cvState, addToast) {
         handleToggleItem,
         handleApplyChanges,
         handleBack,
-        reset
+        handleBack,
+        reset,
+        sourceFile,
+        setSourceFile
     }
 }

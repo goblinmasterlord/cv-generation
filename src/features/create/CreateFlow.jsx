@@ -86,6 +86,13 @@ export function CreateFlow({ cvState, addToast }) {
                                                 <span>Screenshot</span>
                                             </button>
                                             <button
+                                                className={`source-type-option ${flow.sourceType === 'pdf' ? 'source-type-option--active' : ''}`}
+                                                onClick={() => flow.setSourceType('pdf')}
+                                            >
+                                                <Icons.FileText />
+                                                <span>PDF File</span>
+                                            </button>
+                                            <button
                                                 className={`source-type-option ${flow.sourceType === 'html' ? 'source-type-option--active' : ''}`}
                                                 onClick={() => flow.setSourceType('html')}
                                             >
@@ -129,7 +136,36 @@ export function CreateFlow({ cvState, addToast }) {
                                                     <>
                                                         <Icons.Image />
                                                         <p className="file-upload__text">Upload CV Screenshot</p>
-                                                        <p className="file-upload__hint">PNG, JPG, or PDF screenshot</p>
+                                                        <p className="file-upload__hint">PNG, JPG</p>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {flow.sourceType === 'pdf' && (
+                                            <div
+                                                className={`file-upload file-upload--large ${flow.sourceImage ? 'file-upload--active' : ''}`}
+                                                onClick={() => !flow.sourceImage && flow.fileInputRef.current?.click()}
+                                            >
+                                                {flow.sourceImage ? (
+                                                    <div className="file-upload__preview">
+                                                        <span className="file-upload__filename"><Icons.FileText /> {flow.sourceFileName}</span>
+                                                        <span
+                                                            className="file-upload__remove"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                flow.setSourceImage(null);
+                                                                flow.setSourceFileName('');
+                                                            }}
+                                                        >
+                                                            Remove
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <Icons.FileText />
+                                                        <p className="file-upload__text">Upload PDF CV</p>
+                                                        <p className="file-upload__hint">Native PDF analysis supported</p>
                                                     </>
                                                 )}
                                             </div>
@@ -167,7 +203,7 @@ export function CreateFlow({ cvState, addToast }) {
                                         <input
                                             ref={flow.fileInputRef}
                                             type="file"
-                                            accept={flow.sourceType === 'image' ? 'image/*' : '.html'}
+                                            accept={flow.sourceType === 'image' ? 'image/*' : flow.sourceType === 'pdf' ? 'application/pdf' : '.html'}
                                             onChange={flow.handleFileUpload}
                                             style={{ display: 'none' }}
                                         />
