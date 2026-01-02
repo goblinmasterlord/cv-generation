@@ -16,7 +16,7 @@ export function useInterviewFlow(addToast) {
     const [loadingStep, setLoadingStep] = useState(0)
 
     // Source input (similar to CreateFlow)
-    const [sourceType, setSourceType] = useState('text') // 'text' | 'image' | 'html'
+    const [sourceType, setSourceType] = useState('pdf') // Default to PDF as requested
     const [sourceText, setSourceText] = useState('')
     const [sourceImage, setSourceImage] = useState(null) // { file, base64, preview }
     const [sourceFileName, setSourceFileName] = useState('')
@@ -47,7 +47,7 @@ export function useInterviewFlow(addToast) {
     ]
 
     const hasSource = sourceType === 'text' ? sourceText.trim() :
-        sourceType === 'image' ? sourceImage :
+        (sourceType === 'image' || sourceType === 'pdf') ? (sourceImage || sourceFileName) : // Allow if file name exists (pdf/image)
             sourceFileName
 
     const handleFileUpload = useCallback((event) => {
@@ -66,6 +66,20 @@ export function useInterviewFlow(addToast) {
                 addToast('HTML CV loaded - content extracted')
             }
             reader.readAsText(file)
+        } else if (file.type === 'application/pdf') {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setSourceImage({
+                    file: file,
+                    base64: e.target.result,
+                    fileName: file.name
+                })
+                setSourceType('pdf')
+                setSourceFileName(file.name)
+                setSourceText('')
+                addToast('PDF uploaded')
+            }
+            reader.readAsDataURL(file)
         } else if (file.type.startsWith('image/')) {
             const reader = new FileReader()
             reader.onload = (e) => {

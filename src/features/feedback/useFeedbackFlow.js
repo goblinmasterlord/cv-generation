@@ -20,7 +20,7 @@ export function useFeedbackFlow(cvState, addToast) {
     const [jobDescription, setJobDescription] = useState('')
 
     // Source State (aligned with CvInputSection)
-    const [sourceType, setSourceType] = useState('html') // Default to HTML for feedback (upload custom or use base)
+    const [sourceType, setSourceType] = useState('pdf') // Default to PDF as requested
     const [sourceText, setSourceText] = useState('')
     const [sourceImage, setSourceImage] = useState(null) // { file, base64, preview }
     // sourceFile is mapped to sourceImage/sourceText logic or kept for PDF specific handling if needed, 

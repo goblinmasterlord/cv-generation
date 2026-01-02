@@ -58,7 +58,7 @@ export function CvInputSection({
                         onClick={() => onSourceTypeChange(presets[0].id)}
                     >
                         <Icons.User />
-                        <span>From template</span>
+                        <span>Template</span>
                     </button>
                 )}
             </div>

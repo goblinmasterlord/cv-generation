@@ -13,7 +13,7 @@ export function useTailorFlow(cvState, addToast) {
     const [isLoading, setIsLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState(0)
     // Source State (aligned with CvInputSection)
-    const [sourceType, setSourceType] = useState('lilla') // Default to Lilla's CV (Base)
+    const [sourceType, setSourceType] = useState('pdf') // Default to PDF as requested
     const [sourceText, setSourceText] = useState('')
     const [sourceImage, setSourceImage] = useState(null) // { file, base64, preview }
     const [jobDescription, setJobDescription] = useState('')
