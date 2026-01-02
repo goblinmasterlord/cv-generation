@@ -12,6 +12,10 @@ export function useTailorFlow(cvState, addToast) {
     const [step, setStep] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState(0)
+    // Source State (aligned with CvInputSection)
+    const [sourceType, setSourceType] = useState('lilla') // Default to Lilla's CV (Base)
+    const [sourceText, setSourceText] = useState('')
+    const [sourceImage, setSourceImage] = useState(null) // { file, base64, preview }
     const [jobDescription, setJobDescription] = useState('')
     const [userComments, setUserComments] = useState('')
 
@@ -23,9 +27,56 @@ export function useTailorFlow(cvState, addToast) {
         'Formatting Document...'
     ]
 
+    const handleFileUpload = useCallback((event) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        if (file.type === 'text/html' || file.name.endsWith('.html')) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                cvState.loadCustomCv(e.target.result, file.name)
+                setSourceType('html')
+                setSourceImage(null)
+                addToast('Custom template loaded')
+            }
+            reader.readAsText(file)
+        } else {
+            // For Tailor flow, we ideally want HTML. 
+            // If they upload PDF/Image, we can capture it but can't fully tailor it with highlights yet.
+            // We'll allow it for now but warn on action.
+            if (file.type === 'application/pdf') {
+                const reader = new FileReader()
+                reader.onload = (e) => {
+                    setSourceImage({ file, base64: e.target.result, fileName: file.name })
+                    setSourceType('pdf')
+                    addToast('PDF uploaded (Note: Highlighting requires HTML)', 'info')
+                }
+                reader.readAsDataURL(file)
+            } else if (file.type.startsWith('image/')) {
+                const reader = new FileReader()
+                reader.onload = (e) => {
+                    setSourceImage({ file, base64: e.target.result, preview: e.target.result, fileName: file.name })
+                    setSourceType('image')
+                    addToast('Image uploaded (Note: Highlighting requires HTML)', 'info')
+                }
+                reader.readAsDataURL(file)
+            }
+        }
+    }, [cvState, addToast])
+
     const handleTailor = useCallback(async () => {
         if (!jobDescription.trim()) {
             addToast('Please enter a job description', 'error')
+            return
+        }
+
+        // Validate Source for Tailoring
+        // We strictly need HTML content in cvState.currentCv to apply highlights.
+        // If sourceType is text/pdf/image, we don't have that yet.
+        const requiresHtmlMsg = 'Tailoring with highlights requires an HTML CV or Lilla\'s CV. Please upload an HTML file.'
+
+        if (sourceType === 'text' || sourceType === 'pdf' || sourceType === 'image') {
+            addToast(requiresHtmlMsg, 'warning')
             return
         }
 
@@ -67,7 +118,7 @@ export function useTailorFlow(cvState, addToast) {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [jobDescription, cvState, userComments, addToast, callGemini, parseJsonResponse])
+    }, [jobDescription, cvState, userComments, sourceType, addToast, callGemini, parseJsonResponse])
 
     const handleBack = useCallback(() => {
         setStep(0)
@@ -91,6 +142,14 @@ export function useTailorFlow(cvState, addToast) {
         setUserComments,
         handleTailor,
         handleBack,
-        reset
+        reset,
+        // Exposed Source State
+        sourceType,
+        setSourceType,
+        sourceText,
+        setSourceText,
+        sourceImage,
+        setSourceImage,
+        handleFileUpload
     }
 }

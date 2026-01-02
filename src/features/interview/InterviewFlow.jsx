@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Icons, SteppedLoadingOverlay, CollapsibleSection } from '../../components/ui'
+import { CvInputSection } from '../../components/forms'
 import { StepIndicator, BottomBar } from '../../components/layout'
 import { useInterviewFlow } from './useInterviewFlow'
 
@@ -48,129 +49,25 @@ export function InterviewFlow({ addToast }) {
                 <main className="app-flow__main">
                     <div className="flow-step flow-step--input">
                         <div className="flow-step__content">
-                            {/* Source Type Selector */}
-                            <div className="source-type-selector">
-                                <button
-                                    className={`source-type-option ${flow.sourceType === 'text' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => handleSourceTypeChange('text')}
-                                >
-                                    <Icons.Text />
-                                    <span>Paste Text</span>
-                                </button>
-                                <button
-                                    className={`source-type-option ${flow.sourceType === 'pdf' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => handleSourceTypeChange('pdf')}
-                                >
-                                    <Icons.FileText />
-                                    <span>PDF File</span>
-                                </button>
-                                <button
-                                    className={`source-type-option ${flow.sourceType === 'image' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => handleSourceTypeChange('image')}
-                                >
-                                    <Icons.Image />
-                                    <span>Screenshot</span>
-                                </button>
-                                <button
-                                    className={`source-type-option ${flow.sourceType === 'html' ? 'source-type-option--active' : ''}`}
-                                    onClick={() => {
-                                        handleSourceTypeChange('html')
-                                        fileInputRef.current?.click()
-                                    }}
-                                >
-                                    <Icons.Upload />
-                                    <span>HTML File</span>
-                                </button>
-                            </div>
-
-                            {/* Source Input */}
-                            {flow.sourceType === 'text' && (
-                                <section className="input-section">
-                                    <div className="input-section__header">
-                                        <h2 className="input-section__title">Your Experience</h2>
-                                    </div>
-                                    <textarea
-                                        className="textarea"
-                                        placeholder="Paste your CV content, work experience, skills..."
-                                        value={flow.sourceText}
-                                        onChange={(e) => flow.setSourceText(e.target.value)}
-                                    />
-                                    <div className="char-count">{flow.sourceText.length} chars</div>
-                                </section>
-                            )}
-
-                            {flow.sourceType === 'pdf' && (
-                                <section className="input-section">
-                                    <div className="input-section__header">
-                                        <h2 className="input-section__title">Upload PDF CV</h2>
-                                    </div>
-                                    <div
-                                        className="file-upload-zone"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        {flow.sourceImage ? ( // We reuse sourceImage state for PDF file data too
-                                            <div className="file-upload-zone__preview">
-                                                <Icons.FileText />
-                                                <span className="file-upload-zone__filename">{flow.sourceFileName}</span>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <Icons.Upload />
-                                                <span>Click to upload PDF CV</span>
-                                            </>
-                                        )}
-                                    </div>
-                                </section>
-                            )}
-
-                            {flow.sourceType === 'image' && (
-                                <section className="input-section">
-                                    <div className="input-section__header">
-                                        <h2 className="input-section__title">CV Screenshot</h2>
-                                    </div>
-                                    <div
-                                        className="file-upload-zone"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        {flow.sourceImage ? (
-                                            <div className="file-upload-zone__preview">
-                                                <img src={flow.sourceImage.preview} alt="CV Preview" />
-                                                <span className="file-upload-zone__filename">{flow.sourceFileName}</span>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <Icons.Upload />
-                                                <span>Click to upload CV screenshot</span>
-                                            </>
-                                        )}
-                                    </div>
-                                </section>
-                            )}
-
-                            {flow.sourceType === 'html' && flow.sourceFileName && (
-                                <section className="input-section">
-                                    <div className="input-section__header">
-                                        <h2 className="input-section__title">Loaded CV</h2>
-                                    </div>
-                                    <div className="file-loaded-indicator">
-                                        <Icons.FileText />
-                                        <span>{flow.sourceFileName}</span>
-                                        <button
-                                            className="file-loaded-indicator__change"
-                                            onClick={() => fileInputRef.current?.click()}
-                                        >
-                                            Change
-                                        </button>
-                                    </div>
-                                </section>
-                            )}
-
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept={flow.sourceType === 'image' ? 'image/*' : flow.sourceType === 'pdf' ? 'application/pdf' : '.html'}
-                                style={{ display: 'none' }}
-                                onChange={flow.handleFileUpload}
+                            {/* Source Type Selector & Input */}
+                            <CvInputSection
+                                sourceType={flow.sourceType}
+                                onSourceTypeChange={handleSourceTypeChange}
+                                data={{
+                                    text: flow.sourceText,
+                                    image: flow.sourceImage,
+                                    fileName: flow.sourceFileName
+                                }}
+                                handlers={{
+                                    onTextChange: flow.setSourceText,
+                                    onFileChange: flow.handleFileUpload,
+                                    onRemove: () => {
+                                        flow.setSourceImage(null)
+                                        flow.setSourceFileName('')
+                                        flow.setSourceType('text')
+                                    }
+                                }}
+                                fileInputRef={fileInputRef}
                             />
 
                             <div className="divider">Job Details</div>

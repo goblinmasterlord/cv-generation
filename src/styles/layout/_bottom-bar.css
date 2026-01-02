@@ -11,7 +11,7 @@
     background: rgba(37, 37, 37, 0.95);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--color-border);
-    padding: var(--space-md) var(--space-xl);
+    padding: var(--space-sm) var(--space-xl);
 }
 
 .bottom-bar__content {

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Icons, SteppedLoadingOverlay } from '../../components/ui'
 import { CVPreviewFull, CVPreviewModal } from '../../components/cv'
-import { TemplateSelector } from '../../components/forms'
+import { CvInputSection } from '../../components/forms'
 import { StepIndicator, BottomBar } from '../../components/layout'
 import { useTailorFlow } from './useTailorFlow'
 
@@ -73,13 +73,36 @@ export function TailorFlow({ cvState, addToast }) {
                 <main className="app-flow__main">
                     <div className="flow-step flow-step--input">
                         <div className="flow-step__content">
-                            <TemplateSelector
-                                mode={cvState.templateMode}
-                                onModeChange={handleTemplateSwitch}
-                                fileName={cvState.customFileName}
-                                onUpload={handleFileUpload}
-                                onReset={cvState.resetCv}
+                            <CvInputSection
+                                sourceType={flow.sourceType}
+                                onSourceTypeChange={(type) => {
+                                    if (type === 'lilla') {
+                                        cvState.resetCv() // Sets Base CV
+                                        flow.setSourceType('lilla')
+                                        flow.setSourceImage(null)
+                                        flow.setSourceText('')
+                                    } else {
+                                        flow.setSourceType(type)
+                                    }
+                                }}
+                                data={{
+                                    text: flow.sourceText,
+                                    image: flow.sourceImage,
+                                    fileName: cvState.customFileName || flow.sourceImage?.fileName
+                                }}
+                                handlers={{
+                                    onTextChange: flow.setSourceText,
+                                    onFileChange: flow.handleFileUpload,
+                                    onRemove: () => {
+                                        flow.setSourceImage(null)
+                                        flow.setSourceText('')
+                                        // If removing, maybe go back to lilla default?
+                                        flow.setSourceType('lilla')
+                                        cvState.resetCv()
+                                    }
+                                }}
                                 fileInputRef={fileInputRef}
+                                presets={[{ id: 'lilla', label: "Lilla's CV template" }]}
                             />
 
                             <div className="divider">Job Details</div>

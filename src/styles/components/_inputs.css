@@ -71,3 +71,106 @@
     text-align: right;
     margin-top: var(--space-xs);
 }
+
+/* Source Type Selector (Shared by CvInputSection) */
+.source-type-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.source-type-option {
+    min-height: 48px;
+    /* Ensure uniform height */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.source-type-option:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text-light);
+    background: rgba(213, 143, 124, 0.05);
+}
+
+.source-type-option--active {
+    border-color: var(--color-accent);
+    background: rgba(213, 143, 124, 0.15);
+    color: var(--color-accent);
+}
+
+.source-type-option svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+}
+
+.source-type-option--active svg,
+.source-type-option:hover svg {
+    opacity: 1;
+}
+
+/* Secondary Template Selector (Below Source Type) */
+.template-selector-area {
+    margin-bottom: var(--space-lg);
+    animation: fadeIn 0.3s ease;
+}
+
+.template-options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns for templates? or 1? User implied a list */
+    gap: var(--space-sm);
+}
+
+.template-option {
+    display: flex;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.template-option:hover {
+    border-color: var(--color-accent);
+    background: rgba(213, 143, 124, 0.05);
+}
+
+.template-option--active {
+    border-color: var(--color-accent);
+    background: rgba(213, 143, 124, 0.15);
+}
+
+.template-option__icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-sm);
+    color: var(--color-text-muted);
+}
+
+.template-option--active .template-option__icon {
+    color: var(--color-accent);
+}
+
+.template-option__label {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+}

@@ -42,8 +42,8 @@
     flex: 1;
     padding-top: 120px;
     /* Header + Step Indicator */
-    padding-bottom: 140px;
-    /* Bottom Bar - increased to prevent overlap */
+    padding-bottom: 100px;
+    /* Bottom Bar - reduced to match thinner bar */
     display: flex;
     justify-content: center;
     overflow-y: auto;
@@ -62,15 +62,15 @@
 .flow-step::after {
     content: '';
     display: block;
-    height: 200px;
-    /* This invisible spacer extends scroll range past the content */
+    height: 100px;
+    /* Reduced spacer to prevent excessive scrolling gap */
 }
 
 .flow-step--input {
     max-width: 640px;
     padding: var(--space-xl);
-    padding-bottom: 240px;
-    /* Nuclear option: Ensure huge clearance for bottom bar */
+    padding-bottom: 120px;
+    /* Reduced clearance for bottom bar */
 }
 
 .flow-step--feedback {

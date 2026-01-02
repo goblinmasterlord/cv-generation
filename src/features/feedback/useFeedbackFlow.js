@@ -14,9 +14,21 @@ export function useFeedbackFlow(cvState, addToast) {
     const [loadingStep, setLoadingStep] = useState(0)
     const [isApplying, setIsApplying] = useState(false)
     const [applyStep, setApplyStep] = useState(0)
-    const [sourceFile, setSourceFile] = useState(null) // { file, base64 }
+
+    // Core State
     const [feedback, setFeedback] = useState(null)
     const [jobDescription, setJobDescription] = useState('')
+
+    // Source State (aligned with CvInputSection)
+    const [sourceType, setSourceType] = useState('html') // Default to HTML for feedback (upload custom or use base)
+    const [sourceText, setSourceText] = useState('')
+    const [sourceImage, setSourceImage] = useState(null) // { file, base64, preview }
+    // sourceFile is mapped to sourceImage/sourceText logic or kept for PDF specific handling if needed, 
+    // but CvInputSection uses 'sourceImage' for both Image and PDF preview/data usually, or we can adapt.
+    // Let's stick to the pattern in InterviewFlow: sourceImage used for PDF/Image data.
+
+    // Legacy: sourceFile was used for PDF. Let's map it:
+    // We will replace sourceFile with sourceImage for consistency with InterviewFlow
 
     const { callGemini, callGeminiMultimodal, parseJsonResponse } = useGeminiApi(addToast)
 
@@ -44,6 +56,50 @@ export function useFeedbackFlow(cvState, addToast) {
         return steps
     }, [feedback])
 
+    const handleFileUpload = useCallback((event) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        if (file.type === 'text/html' || file.name.endsWith('.html')) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                cvState.loadCustomCv(e.target.result, file.name)
+                setSourceType('html')
+                setSourceImage(null)
+                addToast('Custom template loaded')
+            }
+            reader.readAsText(file)
+        } else if (file.type === 'application/pdf') {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setSourceImage({
+                    file,
+                    base64: e.target.result,
+                    fileName: file.name
+                })
+                setSourceType('pdf')
+                cvState.setCustomFileName(file.name) // For display awareness
+                addToast('PDF uploaded for analysis')
+            }
+            reader.readAsDataURL(file)
+        } else if (file.type.startsWith('image/')) {
+            const reader = new FileReader()
+            reader.onload = (e) => {
+                setSourceImage({
+                    file,
+                    base64: e.target.result,
+                    preview: e.target.result,
+                    fileName: file.name
+                })
+                setSourceType('image')
+                addToast('Image uploaded for analysis')
+            }
+            reader.readAsDataURL(file)
+        } else {
+            addToast('Please upload HTML, PDF or Image', 'error')
+        }
+    }, [cvState, addToast])
+
     const handleFeedback = useCallback(async () => {
         if (!jobDescription.trim()) {
             addToast('Please enter a job description', 'error')
@@ -58,24 +114,42 @@ export function useFeedbackFlow(cvState, addToast) {
             setLoadingStep(1)
             let responseText
 
-            // Check if we are using PDF mode (sourceFile exists)
-            if (sourceFile && sourceFile.file.type === 'application/pdf') {
+            // Determine source content
+            if (sourceType === 'pdf' && sourceImage) {
                 setLoadingStep(2)
-                // Dynamic import to avoid circular dependency issues if any, but standard import works
                 const { createFeedbackMultimodalPrompt } = await import('../../prompts/feedbackCv')
                 const prompt = createFeedbackMultimodalPrompt(jobDescription)
 
                 responseText = await callGeminiMultimodal(prompt, {
-                    base64: sourceFile.base64,
+                    base64: sourceImage.base64,
                     mimeType: 'application/pdf'
                 }, { temperature: 0.5 })
 
+            } else if (sourceType === 'image' && sourceImage) {
+                setLoadingStep(2)
+                // Multimodal for image
+                const { createFeedbackMultimodalPrompt } = await import('../../prompts/feedbackCv')
+                const prompt = createFeedbackMultimodalPrompt(jobDescription)
+
+                responseText = await callGeminiMultimodal(prompt, {
+                    base64: sourceImage.base64,
+                    mimeType: sourceImage.file.type
+                }, { temperature: 0.5 })
+
+            } else if (sourceType === 'text') {
+                setLoadingStep(2)
+                const { createFeedbackPrompt } = await import('../../prompts/feedbackCv')
+                // For text input, we pass it as cvText and empty html
+                const prompt = createFeedbackPrompt(jobDescription, sourceText, '')
+                responseText = await callGemini(prompt, { temperature: 0.5 })
+
             } else {
-                // Standard HTML/Text mode
+                // Default: HTML mode (using cvState.currentCv)
                 const parsed = parseCvToText(cvState.currentCv)
                 const cvText = generateTextRepresentation(parsed)
-
+                // If it's the base template, we might want to flag that, but logic holds
                 setLoadingStep(2)
+                const { createFeedbackPrompt } = await import('../../prompts/feedbackCv')
                 const prompt = createFeedbackPrompt(jobDescription, cvText, cvState.currentCv)
                 responseText = await callGemini(prompt, { temperature: 0.5 })
             }
@@ -100,7 +174,7 @@ export function useFeedbackFlow(cvState, addToast) {
             setIsLoading(false)
             setLoadingStep(0)
         }
-    }, [jobDescription, cvState, sourceFile, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
+    }, [jobDescription, cvState, sourceType, sourceImage, sourceText, addToast, callGemini, callGeminiMultimodal, parseJsonResponse])
 
     const handleToggleItem = useCallback((itemId) => {
         setFeedback(prev => ({
@@ -192,9 +266,14 @@ export function useFeedbackFlow(cvState, addToast) {
         handleToggleItem,
         handleApplyChanges,
         handleBack,
-        handleBack,
         reset,
-        sourceFile,
-        setSourceFile
+        // Exposed state for CvInputSection
+        sourceType,
+        setSourceType,
+        sourceText,
+        setSourceText,
+        sourceImage,
+        setSourceImage,
+        handleFileUpload
     }
 }

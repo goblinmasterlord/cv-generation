@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Icons, SteppedLoadingOverlay } from '../../components/ui'
 import { CVPreviewFull, CVPreviewModal } from '../../components/cv'
 import { FeedbackResults } from '../../components/feedback'
-import { TemplateSelector } from '../../components/forms'
+import { CvInputSection } from '../../components/forms'
 import { StepIndicator, BottomBar } from '../../components/layout'
 import { useFeedbackFlow } from './useFeedbackFlow'
 
@@ -102,12 +102,30 @@ export function FeedbackFlow({ cvState, addToast }) {
                 <main className="app-flow__main">
                     <div className="flow-step flow-step--input">
                         <div className="flow-step__content">
-                            <TemplateSelector
-                                mode={cvState.templateMode}
-                                onModeChange={handleTemplateSwitch}
-                                fileName={cvState.customFileName}
-                                onUpload={handleFileUpload}
-                                onReset={cvState.resetCv}
+                            <CvInputSection
+                                sourceType={flow.sourceType}
+                                onSourceTypeChange={(type) => {
+                                    if (type === 'base') {
+                                        cvState.resetCv()
+                                        flow.setSourceType('html')
+                                    } else {
+                                        flow.setSourceType(type)
+                                    }
+                                }}
+                                data={{
+                                    text: flow.sourceText,
+                                    image: flow.sourceImage,
+                                    fileName: cvState.customFileName || flow.sourceImage?.fileName
+                                }}
+                                handlers={{
+                                    onTextChange: flow.setSourceText,
+                                    onFileChange: flow.handleFileUpload,
+                                    onRemove: () => {
+                                        flow.setSourceImage(null)
+                                        flow.setSourceText('')
+                                        // Reset to html mode if current cv is base? Logic depends on intent
+                                    }
+                                }}
                                 fileInputRef={fileInputRef}
                             />
 

@@ -301,7 +301,7 @@ export function CreateFlow({ cvState, addToast }) {
                 </main>
                 <BottomBar>
                     <button
-                        className="btn btn--primary btn--large"
+                        className="btn btn--primary"
                         onClick={flow.handleCreate}
                         disabled={!flow.jobDescription.trim() || !flow.hasSource}
                     >
