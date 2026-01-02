@@ -112,6 +112,11 @@ cv-generator/
 2. **Feedback** → Review analysis, select changes (collapsible sections)
 3. **Result** → View CV with approved changes applied
 
+### Interview Prep Mode (3 steps)
+1. **Input** → Paste CV (text/screenshot/HTML) + job description + optional notes
+2. **Strategy** → "Tell me about yourself" framework + basic Q&A (5-7 questions)
+3. **Technical** → 5-10 technical questions + 3-5 STAR behavioral scenarios
+
 ## Core Architecture: Structured Changes
 
 **Key Insight**: Instead of asking AI to output full HTML, we now:
@@ -162,13 +167,27 @@ Returns full structured CV data (not changes). Conditional sections are omitted 
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `Icons` | `components/ui/Icons.jsx` | SVG icon library |
+| `Icons` | `components/ui/Icons.jsx` | SVG icon library (includes `Mic` for interview) |
 | `ToastContainer` | `components/ui/Toast.jsx` | Notification system |
-| `SteppedLoadingOverlay` | `components/ui/LoadingOverlay.jsx` | Progress during AI calls |
+| `SteppedLoadingOverlay` | `components/ui/LoadingOverlay.jsx` | Progress during AI calls + random tips |
 | `CollapsibleSection` | `components/ui/CollapsibleSection.jsx` | Expandable sections |
 | `CVPreviewFull` | `components/cv/CVPreview.jsx` | Result display with zoom |
 | `CVPreviewModal` | `components/cv/CVPreview.jsx` | Preview modal |
 | `FeedbackResults` | `components/feedback/FeedbackResults.jsx` | Full feedback dashboard |
+
+### Loading Overlay Tips
+
+The `SteppedLoadingOverlay` displays random tips during AI calls. To add more tips:
+
+```javascript
+// In src/components/ui/LoadingOverlay.jsx
+const LOADING_TIPS = [
+    "Tip: Your tip here...",
+    // Add more tips to the array
+]
+```
+
+**Testing loading states**: Use DevTools → Network → Throttling → "Slow 3G" to slow down API calls.
 
 ## Key Hooks
 
@@ -180,14 +199,15 @@ Returns full structured CV data (not changes). Conditional sections are omitted 
 | `useTailorFlow` | `features/tailor/useTailorFlow.js` | Tailor mode logic |
 | `useFeedbackFlow` | `features/feedback/useFeedbackFlow.js` | Feedback mode logic |
 | `useCreateFlow` | `features/create/useCreateFlow.js` | Create mode logic |
+| `useInterviewFlow` | `features/interview/useInterviewFlow.js` | Interview prep logic |
 
 ## State Management
 
-App.jsx is now a thin shell (~45 lines) with only:
-- `activeMode`: 'create' | 'tailor' | 'feedback'
+App.jsx is now a thin shell (~50 lines) with only:
+- `activeMode`: 'create' | 'tailor' | 'feedback' | 'interview'
 - Shared `cvState` from `useCvState` hook
 
-Each flow manages its own state via dedicated hooks (`useTailorFlow`, `useFeedbackFlow`, `useCreateFlow`).
+Each flow manages its own state via dedicated hooks (`useTailorFlow`, `useFeedbackFlow`, `useCreateFlow`, `useInterviewFlow`).
 
 ## Key Files to Edit
 
@@ -207,4 +227,5 @@ Each flow manages its own state via dedicated hooks (`useTailorFlow`, `useFeedba
 | Modify Tailor flow | `src/features/tailor/` |
 | Modify Feedback flow | `src/features/feedback/` |
 | Modify Create flow | `src/features/create/` |
+| Modify Interview flow | `src/features/interview/` |
 

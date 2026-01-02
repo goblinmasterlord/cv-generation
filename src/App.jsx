@@ -5,7 +5,7 @@ import { ToastContainer, useToast } from './components/ui'
 import { Header } from './components/layout'
 
 // Features
-import { TailorFlow, FeedbackFlow, CreateFlow } from './features'
+import { TailorFlow, FeedbackFlow, CreateFlow, InterviewFlow } from './features'
 
 // Hooks
 import { useCvState } from './hooks'
@@ -37,6 +37,9 @@ function App() {
             )}
             {activeMode === 'create' && (
                 <CreateFlow cvState={cvState} addToast={addToast} />
+            )}
+            {activeMode === 'interview' && (
+                <InterviewFlow addToast={addToast} />
             )}
         </div>
     )

@@ -41,7 +41,8 @@ Quick reference for `src/styles/index.css` (~2898 lines).
 | **Apply Loading** | 2063-2155 | Progress during apply |
 | **Preview Controls** | 2157-2193 | Eye toggle, zoom inline |
 | **Feedback Meta** | 2195-2241 | Priority badges, perspectives |
-| **Mobile Responsive** | 2243-2898 | Premium mobile experience |
+| **Interview Prep** | 2242-2707 | Strategy sections, question cards, STAR framework, difficulty badges |
+| **Mobile Responsive** | 2708-3365 | Premium mobile experience |
 
 ## Key CSS Variables
 
