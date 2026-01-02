@@ -1,0 +1,82 @@
+/* =====================================================
+   Component - CV Modal
+   ===================================================== */
+
+.cv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl);
+    animation: fadeIn 0.2s ease;
+}
+
+.cv-modal {
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    width: 100%;
+    max-width: 800px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.cv-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.cv-modal__title {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-light);
+}
+
+.cv-modal__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.cv-modal__close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--space-xs);
+    transition: color var(--transition-fast);
+}
+
+.cv-modal__close:hover {
+    color: var(--color-text-light);
+}
+
+.cv-modal__content {
+    flex: 1;
+    overflow: auto;
+    background: #3a3a3a;
+    display: flex;
+    justify-content: center;
+    padding: var(--space-lg);
+}
+
+.cv-modal__iframe {
+    width: 100%;
+    max-width: 700px;
+    height: 1200px;
+    border: none;
+    background: white;
+    box-shadow: 0 25px 80px -20px rgba(0, 0, 0, 0.6);
+}

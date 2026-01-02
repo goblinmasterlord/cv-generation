@@ -1,0 +1,33 @@
+/* =====================================================
+   Feature - Template Selector
+   ===================================================== */
+
+.template-selector {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.template-option {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.template-option:hover {
+    border-color: var(--color-sage);
+    color: var(--color-text-light);
+}
+
+.template-option--active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(213, 143, 124, 0.08);
+}

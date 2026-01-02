@@ -1,0 +1,42 @@
+/* =====================================================
+   Design Tokens - CSS Custom Properties
+   ===================================================== */
+
+:root {
+    /* Brand Colors - Refined & Sharp */
+    --color-bg-app: #1a1a1a;
+    --color-bg-panel: #252525;
+    --color-bg-input: #2d2d2d;
+    --color-bg-cv: #ffffff;
+
+    --color-text-light: #f5f5f5;
+    --color-text-muted: #888888;
+    --color-text-dark: #1a1a1a;
+    --color-text-secondary: #555555;
+
+    /* Accents */
+    --color-accent: #D58F7C;
+    --color-accent-dark: #B56F5C;
+    --color-accent-glow: rgba(213, 143, 124, 0.15);
+    --color-sage: #61665C;
+    --color-sage-light: #7a7f74;
+    --color-border: #383838;
+    --color-border-light: #E0E0E0;
+
+    /* Typography */
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', 'SF Mono', Consolas, monospace;
+
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms ease;
+}

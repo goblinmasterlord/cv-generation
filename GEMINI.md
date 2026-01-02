@@ -75,7 +75,13 @@ cv-generator/
 │   │   └── index.js
 │   │
 │   ├── styles/
-│   │   └── index.css       # Full design system (~2900 lines, see CSS.md)
+│   │   ├── index.css       # Entry point (imports all partials)
+│   │   ├── base/           # _variables.css, _reset.css
+│   │   ├── layout/         # _app-flow.css, _bottom-bar.css, _panels.css
+│   │   ├── components/     # _buttons.css, _inputs.css, _loading.css, etc.
+│   │   ├── features/       # _feedback.css, _create.css, _interview.css, etc.
+│   │   ├── utilities/      # _animations.css, _helpers.css
+│   │   └── responsive/     # _mobile.css (all @media queries)
 │   │
 │   ├── templates/
 │   │   └── baseCv.js       # Lilla's base CV as HTML string

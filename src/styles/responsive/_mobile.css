@@ -1,0 +1,639 @@
+/* =====================================================
+   Mobile Responsive - Premium Mobile-First Experience
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    /* ===========================================
+     MOBILE - Header & Navigation
+     =========================================== */
+
+    .app-flow__header {
+        flex-direction: column;
+        height: auto;
+        padding: var(--space-sm) var(--space-md);
+        gap: 0;
+    }
+
+    .app__logo {
+        padding: var(--space-sm) 0;
+        font-size: 0.7rem;
+    }
+
+    /* Mobile Nav - Pill Style Full Width */
+    .app__nav {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        background: var(--color-bg-panel);
+        border-top: 1px solid var(--color-border);
+        margin: 0 calc(-1 * var(--space-md));
+        padding: 0;
+        width: calc(100% + var(--space-md) * 2);
+    }
+
+    .nav-tab {
+        padding: var(--space-sm) var(--space-xs);
+        font-size: 0.6rem;
+        letter-spacing: 0.05em;
+        text-align: center;
+        border-bottom: 2px solid transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .nav-tab svg {
+        width: 14px;
+        height: 14px;
+        display: block;
+    }
+
+    .nav-tab--active {
+        background: rgba(213, 143, 124, 0.1);
+        border-bottom-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    .nav-tab--active::after {
+        display: none;
+    }
+
+    /* ===========================================
+     MOBILE - Step Indicator (Compact)
+     =========================================== */
+
+    .app-flow__steps {
+        position: fixed;
+        top: auto;
+        top: 100px;
+        left: 0;
+        right: 0;
+        padding: var(--space-sm) var(--space-md);
+        background: rgba(37, 37, 37, 0.95);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--color-border);
+        z-index: 85;
+    }
+
+    .step-indicator {
+        justify-content: center;
+    }
+
+    .step-indicator__item {
+        gap: var(--space-xs);
+    }
+
+    .step-indicator__number {
+        width: 22px;
+        height: 22px;
+        font-size: 0.65rem;
+    }
+
+    .step-indicator__label {
+        display: none;
+    }
+
+    .step-indicator__line {
+        width: 24px;
+    }
+
+    .step-indicator__item--active .step-indicator__label {
+        display: block;
+        font-size: 0.65rem;
+    }
+
+    /* ===========================================
+     MOBILE - Main Content Area
+     =========================================== */
+
+    .app-flow__main {
+        position: fixed;
+        top: 160px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 0;
+        padding-bottom: 80px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        display: block;
+        height: auto;
+    }
+
+    .flow-step {
+        width: 100%;
+        min-height: 100%;
+    }
+
+    .flow-step--input {
+        max-width: 100%;
+        padding: var(--space-md);
+        padding-top: var(--space-md);
+        padding-bottom: 240px;
+    }
+
+    .input-section:last-of-type {
+        margin-bottom: 100px;
+    }
+
+    .flow-step--feedback {
+        padding: 0;
+        padding-bottom: 100px;
+    }
+
+    .flow-step__content {
+        padding-bottom: var(--space-xl);
+    }
+
+    .flow-step__content--wide {
+        max-width: 100%;
+        padding: var(--space-md);
+        padding-bottom: 100px;
+    }
+
+    .flow-step--result {
+        height: auto;
+        min-height: auto;
+        padding: var(--space-md);
+        padding-bottom: 100px;
+    }
+
+    /* ===========================================
+     MOBILE - Source Type Selector (Stacked)
+     =========================================== */
+
+    .source-type-selector {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .source-type-option {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: var(--space-md) var(--space-lg);
+        min-height: 56px;
+        gap: var(--space-md);
+        text-align: left;
+    }
+
+    .source-type-option svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    .source-type-option span {
+        font-size: 0.85rem;
+    }
+
+    .source-type-option--active {
+        border-left: 3px solid var(--color-accent);
+    }
+
+    /* ===========================================
+     MOBILE - Template Selector (Stacked)
+     =========================================== */
+
+    .template-selector {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .template-option {
+        width: 100%;
+        min-height: 48px;
+        justify-content: center;
+    }
+
+    /* ===========================================
+     MOBILE - Form Inputs
+     =========================================== */
+
+    .input-section {
+        margin-bottom: var(--space-lg);
+    }
+
+    .input-section__title {
+        font-size: 0.75rem;
+    }
+
+    .textarea {
+        min-height: 140px;
+        font-size: 16px;
+        padding: var(--space-md);
+    }
+
+    .textarea--small {
+        min-height: 80px;
+    }
+
+    .textarea--large {
+        min-height: 180px;
+    }
+
+    .char-count {
+        font-size: 0.65rem;
+        margin-top: var(--space-xs);
+    }
+
+    .divider {
+        margin: var(--space-lg) 0;
+        font-size: 0.65rem;
+    }
+
+    /* ===========================================
+     MOBILE - File Upload
+     =========================================== */
+
+    .file-upload {
+        min-height: 100px;
+        padding: var(--space-lg);
+    }
+
+    .file-upload--large {
+        min-height: 160px;
+    }
+
+    .file-upload__text {
+        font-size: 0.85rem;
+    }
+
+    .file-upload__hint {
+        font-size: 0.7rem;
+    }
+
+    /* ===========================================
+     MOBILE - Bottom Bar (Stacked Buttons)
+     =========================================== */
+
+    .bottom-bar {
+        padding: var(--space-md);
+        padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .bottom-bar__content {
+        flex-direction: column-reverse;
+        gap: var(--space-sm);
+        max-width: 100%;
+    }
+
+    .bottom-bar__content .btn {
+        width: 100%;
+        min-height: 52px;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .bottom-bar__content .btn--primary {
+        order: 1;
+    }
+
+    .bottom-bar__content .btn--secondary {
+        order: 2;
+        background: transparent;
+        min-height: 44px;
+    }
+
+    .bottom-bar__spacer {
+        display: none;
+    }
+
+    .bottom-bar__info {
+        order: 3;
+        justify-content: center;
+        padding: var(--space-xs) 0;
+    }
+
+    .bottom-bar__count {
+        font-size: 1rem;
+    }
+
+    .bottom-bar__label {
+        font-size: 0.8rem;
+    }
+
+    /* ===========================================
+     MOBILE - CV Preview
+     =========================================== */
+
+    .cv-preview-full {
+        border-radius: 0;
+        margin: 0;
+    }
+
+    .cv-preview-full__container {
+        padding: 0;
+        background: #fff;
+    }
+
+    .preview-controls {
+        position: fixed;
+        bottom: 140px;
+        right: var(--space-md);
+        top: auto;
+        flex-direction: column;
+        gap: var(--space-xs);
+        z-index: 50;
+    }
+
+    .preview-control-btn {
+        padding: var(--space-sm);
+        font-size: 0;
+        width: 44px;
+        height: 44px;
+        justify-content: center;
+    }
+
+    .preview-control-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .zoom-controls {
+        position: fixed;
+        bottom: 200px;
+        right: var(--space-md);
+        left: auto;
+        transform: none;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+
+    .zoom-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+
+    /* ===========================================
+     MOBILE - Feedback Panel
+     =========================================== */
+
+    .feedback-panel {
+        max-width: 100%;
+        padding: var(--space-md);
+        height: auto;
+        padding-bottom: 160px;
+    }
+
+    .feedback-header {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+    }
+
+    .feedback-score {
+        margin: 0 auto;
+    }
+
+    .feedback-summary {
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    /* Perspective Cards - 1 Column */
+    .perspective-scores {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+    }
+
+    .perspective-card {
+        padding: var(--space-md);
+    }
+
+    .perspective-card__summary {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    /* Feedback Items */
+    .feedback-item {
+        padding: var(--space-md);
+        gap: var(--space-sm);
+    }
+
+    .feedback-item__text {
+        font-size: 0.9rem;
+    }
+
+    .feedback-item__action {
+        font-size: 0.8rem;
+    }
+
+    .feedback-item__toggle {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+    }
+
+    /* Strengths Chips */
+    .strengths-compact {
+        gap: var(--space-xs);
+    }
+
+    .strength-chip {
+        font-size: 0.75rem;
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    /* Collapsible Sections */
+    .feedback-section__header {
+        padding: var(--space-md);
+        min-height: 48px;
+    }
+
+    .feedback-section__title {
+        font-size: 0.65rem;
+    }
+
+    .feedback-section__content {
+        padding: var(--space-sm);
+    }
+
+    /* ===========================================
+     MOBILE - Apply Bar
+     =========================================== */
+
+    .apply-bar {
+        width: 100%;
+        padding: var(--space-md);
+        padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .apply-bar__info {
+        order: 1;
+    }
+
+    .apply-bar__btn {
+        width: 100%;
+        min-height: 52px;
+        order: 2;
+    }
+
+    /* ===========================================
+     MOBILE - Loading States
+     =========================================== */
+
+    .flow-loading {
+        min-height: 300px;
+        padding: var(--space-lg);
+    }
+
+    .flow-loading__content {
+        min-width: auto;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .flow-loading__title {
+        font-size: 0.8rem;
+    }
+
+    .flow-loading__step {
+        font-size: 0.8rem;
+        gap: var(--space-sm);
+    }
+
+    /* Apply Loading */
+    .apply-loading__content {
+        min-width: auto;
+        width: 90%;
+        max-width: 280px;
+    }
+
+    .apply-loading__title {
+        font-size: 0.8rem;
+    }
+
+    .apply-loading__step-text {
+        font-size: 0.8rem;
+    }
+
+    /* ===========================================
+     MOBILE - CV Modal
+     =========================================== */
+
+    .cv-modal__content {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .cv-modal__header {
+        padding: var(--space-md);
+        min-height: 52px;
+    }
+
+    .cv-modal__title {
+        font-size: 0.8rem;
+    }
+
+    .cv-modal__body {
+        padding: 0;
+    }
+
+    /* ===========================================
+     MOBILE - Toast Notifications
+     =========================================== */
+
+    .toast-container {
+        bottom: 160px;
+        left: var(--space-md);
+        right: var(--space-md);
+        transform: none;
+        width: auto;
+    }
+
+    .toast {
+        min-width: auto;
+        width: 100%;
+        padding: var(--space-md);
+    }
+
+    .toast__content {
+        font-size: 0.85rem;
+    }
+
+    /* ===========================================
+     MOBILE - Animations & Polish
+     =========================================== */
+
+    /* Subtle active state for button presses */
+    .btn:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    .nav-tab:active {
+        transform: scale(0.97);
+    }
+
+    .feedback-item:active {
+        transform: scale(0.99);
+    }
+
+    .source-type-option:active,
+    .template-option:active {
+        transform: scale(0.98);
+    }
+
+    /* Smooth scroll for iOS */
+    .app-flow__main,
+    .feedback-panel,
+    .cv-modal__body {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide unnecessary desktop elements */
+    .mobile-hide {
+        display: none !important;
+    }
+
+}
+
+/* Extra Small Screens (< 375px) */
+@media (max-width: 374px) {
+
+    .nav-tab {
+        font-size: 0.55rem;
+        padding: var(--space-sm);
+        min-height: 48px;
+    }
+
+    .nav-tab svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .step-indicator__number {
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+
+    .step-indicator__line {
+        width: 16px;
+    }
+
+    .bottom-bar__content .btn {
+        min-height: 48px;
+        font-size: 0.85rem;
+    }
+
+    .input-section__title {
+        font-size: 0.7rem;
+    }
+
+}

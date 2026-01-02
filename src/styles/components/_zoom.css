@@ -1,0 +1,89 @@
+/* =====================================================
+   Component - Zoom Controls
+   ===================================================== */
+
+/* Inline Zoom Controls (used in CV Preview Full) */
+.zoom-controls-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs);
+}
+
+.zoom-controls-inline .zoom-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.zoom-controls-inline .zoom-btn:hover {
+    color: var(--color-accent);
+}
+
+.zoom-value {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Floating Zoom Controls (used in Panel Preview) */
+.zoom-controls {
+    position: absolute;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    display: flex;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    /* Slight rounding for controls */
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all var(--transition-normal);
+    z-index: 20;
+}
+
+.panel-preview:hover .zoom-controls {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.zoom-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--color-border);
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.zoom-btn:last-child {
+    border-right: none;
+}
+
+.zoom-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-accent);
+}
+
+.zoom-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

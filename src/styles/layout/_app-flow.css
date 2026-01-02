@@ -1,0 +1,186 @@
+/* =====================================================
+   Layout - Flow-Based App Shell
+   ===================================================== */
+
+.app-flow {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-app);
+    overflow: hidden;
+}
+
+.app-flow__header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-bg-app);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 var(--space-xl);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-flow__steps {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: var(--color-bg-panel);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-md) var(--space-xl);
+    display: flex;
+    justify-content: center;
+}
+
+.app-flow__main {
+    flex: 1;
+    padding-top: 120px;
+    /* Header + Step Indicator */
+    padding-bottom: 140px;
+    /* Bottom Bar - increased to prevent overlap */
+    display: flex;
+    justify-content: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    /* Critical for flex scroll containers */
+}
+
+/* Flow Steps */
+.flow-step {
+    width: 100%;
+    animation: fadeInUp 0.4s ease both;
+}
+
+/* Critical: Add scroll spacer to clear fixed bottom bar */
+.flow-step::after {
+    content: '';
+    display: block;
+    height: 200px;
+    /* This invisible spacer extends scroll range past the content */
+}
+
+.flow-step--input {
+    max-width: 640px;
+    padding: var(--space-xl);
+    padding-bottom: 240px;
+    /* Nuclear option: Ensure huge clearance for bottom bar */
+}
+
+.flow-step--feedback {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.flow-step--result {
+    width: 100%;
+    height: calc(100vh - 260px);
+    /* Matches padding (120 + 140) to prevent main scroll */
+    display: flex;
+    justify-content: center;
+}
+
+.flow-step__content {
+    width: 100%;
+}
+
+.flow-step__content--wide {
+    max-width: 800px;
+    padding: var(--space-xl);
+}
+
+/* Flow step variant for interview - centered with wider content */
+.flow-step--interview {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: var(--space-xl);
+    padding-bottom: 120px;
+    /* Clear sticky bottom bar */
+}
+
+.flow-step--interview .flow-step__content--wide {
+    max-width: 900px;
+    width: 100%;
+}
+
+/* Legacy app header class (keep for compatibility) */
+.app__header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-bg-app);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 var(--space-xl);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app__logo {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.app__logo::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--color-accent);
+}
+
+/* Navigation Tabs */
+.app__nav {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.nav-tab {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--transition-fast);
+}
+
+.nav-tab:hover {
+    color: var(--color-text-light);
+}
+
+.nav-tab--active {
+    color: var(--color-text-light);
+}
+
+.nav-tab--active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--space-lg);
+    right: var(--space-lg);
+    height: 2px;
+    background: var(--color-accent);
+}

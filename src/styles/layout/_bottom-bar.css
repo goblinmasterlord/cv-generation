@@ -1,0 +1,60 @@
+/* =====================================================
+   Layout - Sticky Bottom Bar
+   ===================================================== */
+
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(37, 37, 37, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-md) var(--space-xl);
+}
+
+.bottom-bar__content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* Align buttons to the right */
+    gap: var(--space-md);
+}
+
+.bottom-bar__content .btn {
+    width: 180px;
+    /* Fixed width for perfect equality */
+    min-height: 48px;
+    /* Consistent height */
+    flex: 0 0 auto;
+    justify-content: center;
+    padding-left: var(--space-sm) !important;
+    padding-right: var(--space-sm) !important;
+}
+
+.bottom-bar__spacer {
+    flex: 1;
+}
+
+.bottom-bar__info {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    flex: 1;
+    justify-content: center;
+}
+
+.bottom-bar__count {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.bottom-bar__label {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}

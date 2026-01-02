@@ -1,0 +1,66 @@
+/* =====================================================
+   Component - Step Indicator
+   ===================================================== */
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.step-indicator__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    opacity: 0.4;
+    transition: opacity var(--transition-fast);
+}
+
+.step-indicator__item--active,
+.step-indicator__item--done {
+    opacity: 1;
+}
+
+.step-indicator__number {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+}
+
+.step-indicator__item--active .step-indicator__number {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.step-indicator__item--done .step-indicator__number {
+    border-color: var(--color-sage);
+    background: var(--color-sage);
+    color: #fff;
+}
+
+.step-indicator__label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+}
+
+.step-indicator__item--active .step-indicator__label {
+    color: var(--color-text-light);
+}
+
+.step-indicator__line {
+    width: 40px;
+    height: 1px;
+    background: var(--color-border);
+}

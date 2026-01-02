@@ -1,0 +1,190 @@
+/* =====================================================
+   Feature - File Upload
+   ===================================================== */
+
+.file-upload {
+    border: 1px dashed var(--color-border);
+    background: rgba(255, 255, 255, 0.02);
+    padding: var(--space-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.file-upload:hover {
+    border-color: var(--color-accent);
+    background: rgba(213, 143, 124, 0.05);
+}
+
+.file-upload__text {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+}
+
+.file-upload__hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+}
+
+.file-upload--active {
+    border-color: var(--color-accent);
+    border-style: solid;
+    background: rgba(213, 143, 124, 0.1);
+}
+
+.file-upload__preview {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    text-align: left;
+}
+
+.file-upload__filename {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    flex: 1;
+}
+
+.file-upload__remove {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    transition: color var(--transition-fast);
+}
+
+.file-upload__remove:hover {
+    color: #f87171;
+}
+
+/* Large file upload for Create mode */
+.file-upload--large {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+}
+
+.file-upload__image-preview {
+    position: relative;
+    width: 100%;
+}
+
+.file-upload__image-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+}
+
+.file-upload__image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.file-upload__remove-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-light);
+    font-size: 0.75rem;
+    padding: var(--space-xs) var(--space-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.file-upload__remove-btn:hover {
+    background: rgba(248, 113, 113, 0.2);
+    border-color: #f87171;
+    color: #f87171;
+}
+
+/* File Upload Zone (Interview Flow) */
+.file-upload-zone {
+    border: 1px dashed var(--color-border);
+    background: rgba(255, 255, 255, 0.02);
+    padding: var(--space-lg);
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--color-text-muted);
+    width: 100%;
+}
+
+.file-upload-zone:hover {
+    border-color: var(--color-accent);
+    background: rgba(213, 143, 124, 0.05);
+    color: var(--color-accent);
+}
+
+.file-upload-zone__preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.file-upload-zone__preview img {
+    max-height: 100px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+}
+
+.file-upload-zone__filename {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    text-align: center;
+    word-break: break-all;
+}
+
+/* File loaded indicator */
+.file-loaded-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+}
+
+.file-loaded-indicator svg {
+    color: var(--color-sage);
+}
+
+.file-loaded-indicator span {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+}
+
+.file-loaded-indicator__change {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.file-loaded-indicator__change:hover {
+    text-decoration: underline;
+}
