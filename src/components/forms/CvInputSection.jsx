@@ -183,6 +183,7 @@ export function CvInputSection({
 
             {/* Hidden File Input */}
             <input
+                key={sourceType}
                 ref={fileInputRef}
                 type="file"
                 accept={

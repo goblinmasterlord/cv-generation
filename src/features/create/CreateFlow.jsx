@@ -201,6 +201,7 @@ export function CreateFlow({ cvState, addToast }) {
                                         )}
 
                                         <input
+                                            key={flow.sourceType}
                                             ref={flow.fileInputRef}
                                             type="file"
                                             accept={flow.sourceType === 'image' ? 'image/*' : flow.sourceType === 'pdf' ? 'application/pdf' : '.html'}
