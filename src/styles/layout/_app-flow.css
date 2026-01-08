@@ -42,8 +42,8 @@
     flex: 1;
     padding-top: 120px;
     /* Header + Step Indicator */
-    padding-bottom: 100px;
-    /* Bottom Bar - reduced to match thinner bar */
+    padding-bottom: 0;
+    /* Bottom spacing handled by flow-step variants */
     display: flex;
     justify-content: center;
     overflow-y: auto;
@@ -58,31 +58,24 @@
     animation: fadeInUp 0.4s ease both;
 }
 
-/* Critical: Add scroll spacer to clear fixed bottom bar */
-.flow-step::after {
-    content: '';
-    display: block;
-    height: 100px;
-    /* Reduced spacer to prevent excessive scrolling gap */
-}
-
 .flow-step--input {
     max-width: 640px;
     padding: var(--space-xl);
-    padding-bottom: 120px;
-    /* Reduced clearance for bottom bar */
+    padding-bottom: 100px;
+    /* Clearance for bottom bar */
 }
 
 .flow-step--feedback {
     width: 100%;
     display: flex;
     justify-content: center;
+    padding-bottom: 100px;
 }
 
 .flow-step--result {
     width: 100%;
-    height: calc(100vh - 260px);
-    /* Matches padding (120 + 140) to prevent main scroll */
+    height: calc(100vh - 220px);
+    /* Header (120) + Bottom bar (100) */
     display: flex;
     justify-content: center;
 }
@@ -102,7 +95,7 @@
     display: flex;
     justify-content: center;
     padding: var(--space-xl);
-    padding-bottom: 120px;
+    padding-bottom: 100px;
     /* Clear sticky bottom bar */
 }
 

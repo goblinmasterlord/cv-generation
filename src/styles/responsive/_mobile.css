@@ -267,12 +267,11 @@
 
     .app-flow__main {
         position: fixed;
-        top: 160px;
+        top: 90px;
         left: 0;
         right: 0;
         bottom: 0;
         padding: 0;
-        padding-bottom: 80px;
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
@@ -282,40 +281,39 @@
 
     .flow-step {
         width: 100%;
-        min-height: 100%;
     }
 
     .flow-step--input {
         max-width: 100%;
         padding: var(--space-md);
-        padding-top: var(--space-md);
-        padding-bottom: 240px;
+        padding-bottom: 90px;
+        /* Bottom bar clearance */
     }
 
     .input-section:last-of-type {
-        margin-bottom: 100px;
+        margin-bottom: 0;
     }
 
     .flow-step--feedback {
         padding: 0;
-        padding-bottom: 100px;
+        padding-bottom: 90px;
     }
 
     .flow-step__content {
-        padding-bottom: var(--space-xl);
+        padding-bottom: 0;
     }
 
     .flow-step__content--wide {
         max-width: 100%;
         padding: var(--space-md);
-        padding-bottom: 100px;
+        padding-bottom: 90px;
     }
 
     .flow-step--result {
         height: auto;
         min-height: auto;
         padding: var(--space-md);
-        padding-bottom: 100px;
+        padding-bottom: 90px;
     }
 
     /* ===========================================
@@ -614,7 +612,7 @@
         max-width: 100%;
         padding: var(--space-md);
         height: auto;
-        padding-bottom: 160px;
+        padding-bottom: 90px;
     }
 
     .feedback-header {
@@ -953,7 +951,7 @@
 
     .flow-step--interview {
         padding: var(--space-md);
-        padding-bottom: 140px;
+        padding-bottom: 90px;
     }
 
     .flow-step--interview .flow-step__content--wide {
