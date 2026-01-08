@@ -18,7 +18,16 @@
 
     .nav-tab {
         padding: var(--space-sm) var(--space-md);
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+    }
+
+    .nav-tab svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .nav-tab__label {
+        display: inline;
     }
 
     /* Main content - wider input panels */
@@ -117,54 +126,91 @@
      =========================================== */
 
     .app-flow__header {
-        flex-direction: column;
+        flex-direction: row;
         height: auto;
-        padding: var(--space-sm) var(--space-md);
+        padding: 0;
         gap: 0;
+        flex-wrap: wrap;
     }
 
+    /* Logo - Minimal on mobile */
     .app__logo {
-        padding: var(--space-sm) 0;
-        font-size: 0.7rem;
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.65rem;
+        width: 100%;
+        border-bottom: 1px solid var(--color-border);
+        justify-content: center;
     }
 
-    /* Mobile Nav - Pill Style Full Width */
+    .app__logo-mark {
+        width: 6px;
+        height: 6px;
+    }
+
+    .app__logo-text {
+        display: inline;
+    }
+
+    /* Mobile Nav - Bottom Tab Bar Style */
     .app__nav {
         width: 100%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 0;
         background: var(--color-bg-panel);
-        border-top: 1px solid var(--color-border);
-        margin: 0 calc(-1 * var(--space-md));
         padding: 0;
-        width: calc(100% + var(--space-md) * 2);
     }
 
     .nav-tab {
         padding: var(--space-sm) var(--space-xs);
         font-size: 0.6rem;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.02em;
         text-align: center;
-        border-bottom: 2px solid transparent;
+        border-bottom: 3px solid transparent;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
-        min-height: 44px;
+        gap: 4px;
+        min-height: 56px;
         justify-content: center;
+        border-radius: 0;
+        position: relative;
     }
 
     .nav-tab svg {
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
         display: block;
+        opacity: 0.6;
+        transition: all var(--transition-fast);
+    }
+
+    .nav-tab__label {
+        font-size: 0.6rem;
+        font-weight: 500;
+        opacity: 0.8;
+    }
+
+    .nav-tab:hover svg,
+    .nav-tab:active svg {
+        opacity: 1;
     }
 
     .nav-tab--active {
-        background: rgba(213, 143, 124, 0.1);
+        background: rgba(213, 143, 124, 0.08);
         border-bottom-color: var(--color-accent);
         color: var(--color-accent);
+    }
+
+    .nav-tab--active svg {
+        opacity: 1;
+        color: var(--color-accent);
+        transform: scale(1.1);
+    }
+
+    .nav-tab--active .nav-tab__label {
+        opacity: 1;
+        font-weight: 600;
     }
 
     .nav-tab--active::after {
@@ -1177,15 +1223,24 @@
 /* Extra Small Screens (< 375px) */
 @media (max-width: 374px) {
 
+    /* Extra small nav - icons only, hide labels */
+    .app__logo-text {
+        display: none;
+    }
+
     .nav-tab {
-        font-size: 0.55rem;
-        padding: var(--space-sm);
+        padding: var(--space-xs);
         min-height: 48px;
+        gap: 2px;
     }
 
     .nav-tab svg {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .nav-tab__label {
+        font-size: 0.5rem;
     }
 
     .step-indicator__number {

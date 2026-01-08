@@ -19,11 +19,13 @@ export function InterviewFlow({ addToast }) {
     }
 
     const handleSourceTypeChange = (type) => {
-        flow.setSourceType(type)
-        if (type === 'text') {
+        // Clear previous data when switching types
+        if (type !== flow.sourceType) {
             flow.setSourceImage(null)
+            flow.setSourceText('')
             flow.setSourceFileName('')
         }
+        flow.setSourceType(type)
     }
 
     // Loading states
