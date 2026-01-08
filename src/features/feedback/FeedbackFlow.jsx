@@ -105,6 +105,12 @@ export function FeedbackFlow({ cvState, addToast }) {
                             <CvInputSection
                                 sourceType={flow.sourceType}
                                 onSourceTypeChange={(type) => {
+                                    // Clear previous data when switching types
+                                    if (type !== flow.sourceType) {
+                                        flow.setSourceImage(null)
+                                        flow.setSourceText('')
+                                        cvState.setCustomFileName('')
+                                    }
                                     if (type === 'base') {
                                         cvState.resetCv()
                                         flow.setSourceType('html')
@@ -115,7 +121,7 @@ export function FeedbackFlow({ cvState, addToast }) {
                                 data={{
                                     text: flow.sourceText,
                                     image: flow.sourceImage,
-                                    fileName: cvState.customFileName || flow.sourceImage?.fileName
+                                    fileName: flow.sourceType === 'html' ? cvState.customFileName : flow.sourceImage?.fileName
                                 }}
                                 handlers={{
                                     onTextChange: flow.setSourceText,

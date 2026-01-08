@@ -76,19 +76,21 @@ export function TailorFlow({ cvState, addToast }) {
                             <CvInputSection
                                 sourceType={flow.sourceType}
                                 onSourceTypeChange={(type) => {
-                                    if (type === 'lilla') {
-                                        cvState.resetCv() // Sets Base CV
-                                        flow.setSourceType('lilla')
+                                    // Clear previous data when switching types
+                                    if (type !== flow.sourceType) {
                                         flow.setSourceImage(null)
                                         flow.setSourceText('')
-                                    } else {
-                                        flow.setSourceType(type)
+                                        cvState.setCustomFileName('')
                                     }
+                                    if (type === 'lilla') {
+                                        cvState.resetCv() // Sets Base CV
+                                    }
+                                    flow.setSourceType(type)
                                 }}
                                 data={{
                                     text: flow.sourceText,
                                     image: flow.sourceImage,
-                                    fileName: cvState.customFileName || flow.sourceImage?.fileName
+                                    fileName: flow.sourceType === 'html' ? cvState.customFileName : flow.sourceImage?.fileName
                                 }}
                                 handlers={{
                                     onTextChange: flow.setSourceText,
